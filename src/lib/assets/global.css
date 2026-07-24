@@ -1,0 +1,154 @@
+* {
+    color: var(--textLight);
+    font-family:Ubuntu; 
+    font-weight: 400;
+}
+
+body {
+    height:100%;
+    margin: 0;
+}
+
+i {
+    vertical-align: bottom;
+}
+
+a {
+    text-decoration: none;
+}
+
+input {
+    background: var(--ui);
+    border: solid var(--primary);
+    border-width: 0 0 1px;
+    border-radius: .2em;
+    padding: 0 .25em 1px;
+    outline: none;
+    
+    &:hover, &:focus {
+        background: var(--accent);
+        border-width: 0 0 2px;
+        padding: 0 .25em 0;
+    }
+}
+
+textarea {
+    background: var(--ui);
+    border: 1px solid var(--primary);
+    border-radius: .2em;
+    outline: none;
+
+    &:hover, &:focus {
+        background: var(--accent);
+    }
+}
+
+.rounded_button, button, select {
+    border: 1px solid var(--primary);
+    border-radius: .5em;
+    background: var(--ui);
+    outline: none;
+    &:hover {
+        background: var(--accent);
+    }
+}
+
+.input_label {
+    display: flex;
+
+    input:not([type="checkbox"]), select {
+        flex-grow: 1;
+        margin-left: .5em;
+    }
+}
+
+.ui_panel {
+    overflow: hidden;
+    background: var(--panel);
+    border: solid var(--ui);
+    border-radius: 5px;
+    border-width: 10px 1px;
+}
+
+.list {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(var(--columns), auto);
+
+    > * {
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+
+    h3 {
+        margin: 0;
+        padding: .1em 0;
+        border: solid var(--ui);
+        border-width: 2px 0;
+    }
+
+    button, a {
+        display: grid;
+        grid-template-columns: subgrid;
+    }
+}
+
+.go_button {
+    transition: translate 400ms;
+    background: 0;
+    border-style: none;
+    border-width: 0;
+    border-radius: 0;
+
+    &:hover {
+        &::before {
+            width: 1.5em;
+        }
+        translate: 3em;
+        background: var(--ui);
+    }
+
+    &::before {
+        content: "start";
+        position: absolute;
+        right: 100%;
+        top: 0;
+        z-index: -1;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+
+        overflow: hidden;
+        height: 100%;
+        width: 0;
+        transition: width 400ms;
+
+        font-family: "Material Symbols Outlined";
+        background: var(--primary);
+        color: var(--textDark);
+    }
+}
+
+.tab {
+    z-index: 1;
+    grid-column: var(--n) / span 1;
+    grid-row: 1;
+    padding: .2em;
+    margin: 0px 10px;
+    border-style: none;
+    background: var(--ui);
+    border-radius: 5px 5px 0px 0px;
+    cursor: pointer;
+    text-align: center;
+    list-style: none;
+}
+
+details[open] .tab {
+    background: var(--accent);
+    color: var(--primary);
+    border: solid var(--primary);
+    border-width: 0 0 2px;
+    pointer-events: none;
+}
