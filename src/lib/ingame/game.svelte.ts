@@ -547,35 +547,6 @@ export function moveString(move: number): string {
     return s
 }
 
-function playtakString(move: number): string {
-    let s = String.fromCharCode((move & 0x7) + 0x41) + String.fromCharCode(((move >> 3) & 0x7) + 0x31)
-
-    if ((move >> 8) > 0) { //its a spread
-        let drops = move >> 8 & 0xFF
-        let distance = (drops * 0x8040201 & 0x111111111) % 0xF
-        let m2 = move + distance * [1,8,-1,-8][move >> 6 & 0x3]
-        let s2 = String.fromCharCode((m2 & 0x7) + 0x41) + String.fromCharCode(((m2 >> 3) & 0x7) + 0x31)
-
-        s = `M ${s} ${s2}`
-
-        let total = 32 - Math.clz32(drops)
-
-        drops = (drops << Math.clz32(drops) - 24) & 0x7F
-        while (drops > 0) {
-            let t = Math.clz32(drops) - 24
-            drops = (drops << t) & 0x7F
-            s += " " + t
-            total -= t
-        }
-        s += " " + total
-        
-    } else { //its a placement
-        s = `P ${s} ${["", "W", "C"][move >> 6]}`
-    }
-
-    return s
-}
-
 export function parsePtn(s: string): number {
     let start = s.charCodeAt(0)
     let sq
