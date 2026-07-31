@@ -85,7 +85,7 @@
     flex-grow: 1;
     height: 0;
     color: var(--textLight);
-    overflow: hidden;
+    overflow-y: scroll;
     transition: max-height .4s ease-in-out;
     display: flex;
     flex-direction: column;
