@@ -100,6 +100,7 @@
         margin: auto;
         display: flex;
         flex-direction: column;
+        position: relative;
 
         aspect-ratio: var(--size)/calc(var(--size) + 1);
         /* this is equivalent to a max-height of 100% */
