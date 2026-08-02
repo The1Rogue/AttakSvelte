@@ -98,12 +98,13 @@
 <style>
     .holder {
         margin: auto;
-        position: relative;
         display: flex;
         flex-direction: column;
 
         aspect-ratio: var(--size)/calc(var(--size) + 1);
-        max-height: 100%;
+        /* this is equivalent to a max-height of 100% */
+        /* but that cant be set because the height is dynamic */
+        max-width: min(100%, calc(var(--size) * (100vh - 80px - 1.5em) / (var(--size) + .75)));
     }
 
     /* .holder:focus-within {
@@ -160,7 +161,6 @@
     }
 
     .board {
-        grid-area: 2 / 1 / 3 / 3;
         background: var(--boardReserves);
         position: relative;
         display: grid;
@@ -168,8 +168,8 @@
         grid-template-columns: repeat(var(--size), 1fr);
 
         aspect-ratio: 1;
-        max-height: 100%;
-        max-width: 100%;
+        /* max-height: 100%;
+        max-width: 100%; */
 
         .piece {
             pointer-events: none;
@@ -279,7 +279,6 @@
             background: color-mix(in srgb, var(--ring4) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
         }
     }
-
 
 
     .colLabel {
