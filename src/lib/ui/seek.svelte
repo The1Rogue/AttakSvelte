@@ -4,6 +4,7 @@
     import { acceptGame, get_rating } from "$lib/backends/connector.svelte"
 
     let { seek } = $props()
+    let ratingPromise = $state(get_rating(seek.p1))
 </script>
 
 
@@ -12,7 +13,7 @@
     <p>
         {seek.p1}
     
-    {#await get_rating(seek.p1)}
+    {#await ratingPromise}
         (???)
     {:then rating}
         ({rating})
