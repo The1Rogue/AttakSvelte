@@ -102,7 +102,7 @@
         flex-direction: column;
         position: relative;
 
-        aspect-ratio: var(--size)/calc(var(--size) + 1);
+        aspect-ratio: var(--size)/calc(var(--size) + .75);
         /* this is equivalent to a max-height of 100% */
         /* but that cant be set because the height is dynamic */
         max-width: min(100%, calc(var(--size) * (100vh - 80px - 1.5em) / (var(--size) + .75)));
