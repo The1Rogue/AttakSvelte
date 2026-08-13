@@ -1,5 +1,4 @@
 <script lang="ts">
-    // import { requestDraw, requestUndo, resign } from "$lib/backends/connector.svelte";
     let { game } = $props()
     import { moveString } from "$lib/ingame/game.svelte"
     let w = $state(1)
@@ -56,7 +55,8 @@
                 "ply",
                 (i + startply < 2) == (((i + startply) & 1) == 0) ? "black" : "white",
                 i >= game.currentView ? 'future' : 'past'
-            ]}>
+            ]}
+            style:grid-column="{((i + startply) & 1) + 2} / span 1">
                 {moveString(ply)}
             </button>
         {/each}
@@ -144,7 +144,6 @@
     }
 
     .white {
-        grid-column: 2 / 3;
         border-color: var(--player1);
 
         &.past {
@@ -158,7 +157,6 @@
     }
 
     .black {
-        grid-column: 3 / 4;
         border-color: var(--player2);
 
         &.past {

@@ -1,7 +1,4 @@
 
-// import type { GameData } from "$lib/socket.svelte"
-// import { send, addGame, games} from "$lib/socket.svelte"
-
 import type { Backend, GameData } from "$lib/backends/connector.svelte"
 
 //move: number
