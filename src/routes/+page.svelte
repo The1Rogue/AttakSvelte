@@ -3,8 +3,7 @@
     import Seeks from '$lib/ui/seeks.svelte'
     import Events from '$lib/ui/tourneys.svelte'
     import Login from "$lib/ui/login.svelte"
-
-    // import { isConnected } from "$lib/socket.svelte"
+    
     import { isConnected } from '$lib/backends/connector.svelte'; 
 
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { requestDraw, requestUndo, resign } from "$lib/backends/connector.svelte";
+    // import { requestDraw, requestUndo, resign } from "$lib/backends/connector.svelte";
     let { game } = $props()
     import { moveString } from "$lib/ingame/game.svelte"
     let w = $state(1)
@@ -13,22 +13,24 @@
         if (game.history.size <= 0) {return}
         if (game.data.color == 3) {
             game.removeLast()
-        } else if (game.data.id <= 0) {
-            //TODO
+        } else if (game.backend == undefined) {
+            //TODO ???
         } else {
-            requestUndo(game.data.id, (game.undoReq & 2) != 0)
+            game.undoReq ^= 2
+            game.backend.requestUndo(game, (game.undoReq & 2) == 0)
         }
     }
 
     function resignButton() {
-        if (game.data.id > 0) {
-            resign(game.data.id)
+        if (game.backend != undefined) {
+            game.backend.resign(game.data.id)
         }
     }
 
     function drawButton() {
-        if (game.data.id > 0) {
-            requestDraw(game.data.id, (game.drawReq & 2) != 0)
+        if (game.backend != undefined) {
+            game.drawReq ^= 2
+            game.backend.requestDraw(game, (game.drawReq & 2) == 0)
         }
     }
 

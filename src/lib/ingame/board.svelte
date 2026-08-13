@@ -38,8 +38,8 @@
     {/if}
 
     <div class="head">
-        <p class={["pwhite", (game.history.length & 1) == 0 ? "active" : ""]}>{game.data.p1} - {timew}</p>
-        <p class={["pblack", (game.history.length & 1) == 1 ? "active" : ""]}>{timeb} - {game.data.p2}</p>
+        <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1} - {timew}</p>
+        <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{timeb} - {game.data.p2}</p>
         <i class="fill-primary material-symbols-outlined" onclick={() => showMenu = true}>menu</i>
         <!-- <svg viewBox="0 0 448 512" class="fill-primary" onclick={() => showMenu = true}>
             <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path>

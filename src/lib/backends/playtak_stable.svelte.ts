@@ -78,28 +78,28 @@ export class PlaytakStable implements Backend {
         this.ws?.send(`Observe ${id}`)
     }
 
-    send_move(move: number, gameID: number) {
-        this.ws?.send(`Game#${gameID} ${moveString(move)}`)
+    send_move(move: number, game: Game) {
+        this.ws?.send(`Game#${game.data.id} ${moveString(move)}`)
     }
 
-    requestUndo(id: number, retract: boolean) {
+    requestUndo(game: Game, retract: boolean) {
         if (retract) {
-            this.ws?.send(`Game#${id} RemoveUndo`)
+            this.ws?.send(`Game#${game.data.id} RemoveUndo`)
         } else {
-            this.ws?.send(`Game#${id} RequestUndo`)
+            this.ws?.send(`Game#${game.data.id} RequestUndo`)
         }
     }
 
-    requestDraw(id: number, retract: boolean) {
+    requestDraw(game: Game, retract: boolean) {
         if (retract) {
-            this.ws?.send(`Game#${id} RemoveDraw`)
+            this.ws?.send(`Game#${game.data.id} RemoveDraw`)
         } else {
-            this.ws?.send(`Game#${id} OfferDraw`)
+            this.ws?.send(`Game#${game.data.id} OfferDraw`)
         }
     }
 
-    resign(id: number) {
-        this.ws?.send(`Game#${id} Resign`)
+    resign(game: Game) {
+        this.ws?.send(`Game#${game.data.id} Resign`)
     }
 
     shout(msg: string) {

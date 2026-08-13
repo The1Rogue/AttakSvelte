@@ -238,7 +238,7 @@ export class Game {
         this.currentView++
         this.history.push(move)
         if (this.backend != undefined) {
-            this.backend.send_move(move, this.data.id)
+            this.backend.send_move(move, this)
         }
 
         if (this.timer < 0) {

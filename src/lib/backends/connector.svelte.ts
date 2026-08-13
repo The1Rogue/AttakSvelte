@@ -3,6 +3,7 @@ import { goto } from "$app/navigation"
 import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
 import { PlaytakStable } from "./playtak_stable.svelte"
+import { PuzzleBackend } from "./puzzles.svelte"
 
 enum Color {
     Neither = 0,
@@ -38,11 +39,11 @@ export interface Backend {
     search: (game: GameData) => void,
     acceptGame: (id: number) => void,
     spectate: (id: number) => void,
-    send_move: (move: number, gameID: number) => void,
+    send_move: (move: number, game: Game) => void,
 
-    requestUndo: (id: number, retract: boolean) => void,
-    requestDraw: (id: number, retract: boolean) => void,
-    resign: (id: number) => void,
+    requestUndo: (game: Game, retract: boolean) => void,
+    requestDraw: (game: Game, retract: boolean) => void,
+    resign: (game: Game) => void,
 
     shout: (msg: string) => void,
     send_dm: (user: string, msg: string) => void,
@@ -53,7 +54,7 @@ export interface Backend {
     get_history: (options: Object) => Promise<Array<Object>>,
 }
 
-const backends: Array<Backend> = [new PlaytakStable()]
+const backends: Array<Backend> = [new PlaytakStable(), new PuzzleBackend()]
 
 let active_backend: number = $state(-1)
 
@@ -102,7 +103,6 @@ export function disconnect() {
 
 export function addGame(game: Game) {
     //TODO checks for  //this comment left by me at one point seems unfinished... not sure what im supposed to be checking....
-
     if (games.find((e) => e.data.id == game.data.id && e.backend == game.backend)) {
         goto("/game")
         return //replace instead??
@@ -123,27 +123,6 @@ export function closeGame(id: number) {
     if ( games.length <= 0 ) {
         goto("/")
     }
-}
-
-export function requestUndo(id: number, retract: boolean) {
-    if (id <= 0) {return}
-    let g = getGame(id)
-    if (g == undefined) {return}
-    g.undoReq ^= 2
-
-    backends[active_backend].requestUndo(id, retract)
-}
-
-export function requestDraw(id: number, retract: boolean) {
-    if (id <= 0) {return}
-    let g = getGame(id)
-    if (g == undefined) {return}
-    g.drawReq ^= 2
-    backends[active_backend].requestDraw(id, retract)
-}
-
-export function resign(id: number) {
-    backends[active_backend].resign(id)
 }
 
 export function shout(msg: string) {
