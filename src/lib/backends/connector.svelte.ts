@@ -103,7 +103,7 @@ export function disconnect() {
 export function addGame(game: Game) {
     //TODO checks for  //this comment left by me at one point seems unfinished... not sure what im supposed to be checking....
 
-    if (games.find((e) => e.data.id == game.data.id)) {
+    if (games.find((e) => e.data.id == game.data.id && e.backend == game.backend)) {
         goto("/game")
         return //replace instead??
     }
@@ -123,10 +123,6 @@ export function closeGame(id: number) {
     if ( games.length <= 0 ) {
         goto("/")
     }
-}
-
-export function clientMove(move: number, id: number) {
-    backends[active_backend].send_move(move, id)
 }
 
 export function requestUndo(id: number, retract: boolean) {

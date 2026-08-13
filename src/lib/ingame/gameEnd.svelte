@@ -1,7 +1,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events --> <!-- svelte-ignore a11y_no_static_element_interactions -->
 
 <script lang="ts">
-    import { GameStateStrings } from "$lib/ingame/game.svelte"
+    import { GameStateStrings } from "$lib/backends/playtak_stable.svelte"
     import { closeGame } from "$lib/backends/connector.svelte";
 
     import { addToast } from "$lib/ui/toast.svelte";

@@ -6,7 +6,7 @@ import type { Backend } from "$lib/backends/connector.svelte"
 
 import { addDirect, addMsg, addRoom } from "$lib/chat/chats.svelte"
 import { player_seeks, bot_seeks, ongoing, addGame, getGame, disconnect } from "$lib/backends/connector.svelte"
-import { Game, GameStateStrings } from "$lib/ingame/game.svelte"
+import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
 
 
@@ -26,6 +26,8 @@ export type GameData = {
     rated: boolean,
     tourney: boolean
 }
+
+export const GameStateStrings = ["0-0", "1/2-1/2", "F-0", "0-F", "R-0", "0-R", "1-0", "0-1"]
 
 enum Color {
     Neither = 0,
@@ -222,7 +224,7 @@ export class PlaytakStable implements Backend {
                 trigger: parseInt(cmd[12]),
                 extra: parseInt(cmd[13]),
             }
-            addGame(new Game(gameData))
+            addGame(new Game(gameData, undefined, this))
             let players = [cmd[2], cmd[3]]
             players.sort()
             this.ws?.send("JoinRoom " + players.join("-"))
@@ -245,7 +247,7 @@ export class PlaytakStable implements Backend {
                 trigger: parseInt(cmd[15]),
                 extra: parseInt(cmd[16]),
             }
-            addGame(new Game(gameData))
+            addGame(new Game(gameData, undefined, this))
             let opp = cmd[6] == "white" ? cmd[5] : cmd[3]
             addDirect(opp)
         } 
@@ -265,7 +267,7 @@ export class PlaytakStable implements Backend {
                 game.timew = parseInt(cmd[2])
                 game.timeb = parseInt(cmd[3])
             } else if (cmd[1] == "Over") {
-                game.gameState = GameStateStrings.indexOf(cmd[2])
+                game.end(GameStateStrings.indexOf(cmd[2]))
             } else if (cmd[1] == "OfferDraw") {
                 game.drawReq |= 1
             } else if (cmd[1] == "RemoveDraw") {
@@ -277,7 +279,7 @@ export class PlaytakStable implements Backend {
             } else if (cmd[1] == "Undo") {
                 game.removeLast()
             } else if (cmd[1] == "Abandoned.") {
-                game.gameState = game.data.p1 == cmd[2] ? 7 : 6            
+                game.end(game.data.p1 == cmd[2] ? 7 : 6)
             }
         }
 

@@ -2,8 +2,7 @@
 // import type { GameData } from "$lib/socket.svelte"
 // import { send, addGame, games} from "$lib/socket.svelte"
 
-import type { GameData } from "$lib/backends/connector.svelte"
-import { clientMove } from "$lib/backends/connector.svelte"
+import type { Backend, GameData } from "$lib/backends/connector.svelte"
 
 //move: number
 //
@@ -30,7 +29,6 @@ enum GameState {
     DefaultWinWhite,
     DefaultWinBlack,
 }
-export const GameStateStrings = ["0-0", "1/2-1/2", "F-0", "0-F", "R-0", "0-R", "1-0", "0-1"]
 
 enum State {
     None,
@@ -61,11 +59,95 @@ type Piece = {
     height: number,
 }
 
+export class TPSPosition {
+
+    pieces: Array<Piece> = []
+    board: Array<Array<number>> = []
+    flats: [number, number] = [0, 0]
+    caps: [number, number] = [0,0]
+    ply: number = 0
+
+
+    static fromTPS(tps: String, flats: number, caps: number): [TPSPosition | undefined, number] {
+
+        let pos = new TPSPosition()
+
+        pos.flats = [flats, flats]
+        pos.caps = [caps, caps]
+
+        pos.pieces = new Array(flats * 2 + caps * 2).fill(0).map((_, i) => {
+            let type = i < caps * 2 ? PieceType.Cap : PieceType.Flat
+            return {id: i, type: type, selected: false, position: -1, height: 0}
+        })
+
+        pos.board = new Array(8 * 8).fill(0).map(_ => [])
+
+        let s = tps.split(" ")
+        pos.ply = 2 * parseInt(s[2]) + parseInt(s[1]) - 3
+
+        let rows = s[0].split("/")
+        let size = rows.length
+
+        let idx = size * 8 - 8
+        let pieceid = 0
+
+        for (let row of rows) {
+            let sqs = row.split(",")
+            for (let sq of sqs) {
+                if (sq.startsWith("x")){
+                    if (sq.length == 1) {idx++}
+                    else {idx += sq.charCodeAt(1) - 0x30}
+                } else {
+
+                    for (let piece of sq) {
+                        if (piece == "1") {
+                            pieceid = (caps + --pos.flats[0]) * 2
+                            pos.pieces[pieceid].position = idx
+                            pos.pieces[pieceid].height = pos.board[idx].length
+                            pos.board[idx].push(pieceid)
+
+                        } else if (piece == "2") {
+                            pieceid = (caps + --pos.flats[1]) * 2 + 1
+                            pos.pieces[pieceid].position = idx
+                            pos.pieces[pieceid].height = pos.board[idx].length
+                            pos.board[idx].push(pieceid)
+
+                        } else if (piece == "S") {
+                            pos.pieces[pieceid].type = PieceType.Wall
+
+                        } else if (piece == "C") {
+                            pos.flats[pieceid & 1]++
+                            pos.pieces[pieceid].position = -1
+                            pos.pieces[pieceid].height = 0
+                            
+                            pieceid = --pos.caps[pieceid & 1] * 2 + (pieceid & 1)
+                            
+                            pos.board[idx][pos.board[idx].length-1] = pieceid
+                            pos.pieces[pieceid].position = idx
+                            pos.pieces[pieceid].height = pos.board[idx].length - 1
+
+                        } else {
+                            return [undefined, 0]
+                        }
+                    }
+                    idx += 1
+                }
+            }
+            idx -= 8 + size
+
+        }
+        return [pos, size]
+    }
+
+}
+
 export class Game {
-    // startPos: 
+    startPos: TPSPosition | undefined
+
     data: GameData
-    pieces: Array<Piece>
-    board: Array<Array<number>>
+    backend: Backend | undefined
+    pieces: Array<Piece> = $state([])
+    board: Array<Array<number>> = $state([])
 
     gameState: GameState = $state(GameState.Ongoing)
 
@@ -93,17 +175,30 @@ export class Game {
 
     highlight: Array<number> = $state([])
 
-    constructor(info: GameData) {
+    constructor(info: GameData, startPos: TPSPosition | undefined, backend: Backend | undefined = undefined) {
         this.data = info
-        this.reserve_flats = [info.flats, info.flats]
-        this.reserve_caps = [info.caps, info.caps]
+        this.backend = backend
 
-        this.pieces = $state(new Array(info.flats * 2 + info.caps * 2).fill(0).map((_, i) => {
-            let type = i < info.caps * 2 ? PieceType.Cap : PieceType.Flat
-            return {id: i, type: type, selected: false, position: -1, height: 0}
-        }))
 
-        this.board = $state(new Array(8 * 8).fill(0).map(_ => []))
+        this.startPos = startPos
+        if (startPos == undefined) {
+            this.reserve_flats = [info.flats, info.flats]
+            this.reserve_caps = [info.caps, info.caps]
+
+            this.pieces = new Array(info.flats * 2 + info.caps * 2).fill(0).map((_, i) => {
+                let type = i < info.caps * 2 ? PieceType.Cap : PieceType.Flat
+                return {id: i, type: type, selected: false, position: -1, height: 0}
+            })
+
+            this.board = new Array(8 * 8).fill(0).map(_ => [])
+
+        } else {
+            this.reserve_flats = [startPos.flats[0], startPos.flats[1]]
+            this.reserve_caps = [startPos.caps[0], startPos.caps[1]]
+
+            this.pieces = new Array(startPos.pieces.length).fill(0).map((_, i) => {return Object.assign({}, startPos.pieces[i])})
+            this.board = new Array(8 * 8).fill(0).map((_, i) => {return Object.assign([], startPos.board[i])})
+        }
     }
 
     static idx(x: number, y: number): number { return x | (y << 3)}
@@ -132,7 +227,7 @@ export class Game {
 
     tick() {
         if (this.gameState != GameState.Ongoing) {clearInterval(this.timer)}
-        if ((this.history.length & 1) == 0) {
+        if ((this.currentPly() & 1) == 0) {
             this.timew = Math.max(0, this.timew - 1000)
         } else {
             this.timeb = Math.max(0, this.timeb - 1000)
@@ -142,8 +237,8 @@ export class Game {
     sendMove(move: number) {
         this.currentView++
         this.history.push(move)
-        if (this.data.id > 0) {
-            clientMove(move, this.data.id)
+        if (this.backend != undefined) {
+            this.backend.send_move(move, this.data.id)
         }
 
         if (this.timer < 0) {
@@ -185,16 +280,28 @@ export class Game {
     }
 
     reset() {
-        this.reserve_flats = [this.data.flats, this.data.flats]
-        this.reserve_caps = [this.data.caps, this.data.caps]
-
-        this.pieces = new Array(this.data.flats * 2 + this.data.caps * 2).fill(0).map((_, i) => {
-            let type = i < this.data.caps * 2 ? PieceType.Cap : PieceType.Flat
-            return {id: i, type: type, selected: false, position: -1, height: 0}
-        })
-
-        this.board = new Array(8 * 8).fill(0).map(_ => [])
         this.currentView = 0
+
+        if (this.startPos == undefined) {
+            this.reserve_flats = [this.data.flats, this.data.flats]
+            this.reserve_caps = [this.data.caps, this.data.caps]
+
+            this.pieces = new Array(this.data.flats * 2 + this.data.caps * 2).fill(0).map((_, i) => {
+                let type = i < this.data.caps * 2 ? PieceType.Cap : PieceType.Flat
+                return {id: i, type: type, selected: false, position: -1, height: 0}
+            })
+
+            this.board = new Array(8 * 8).fill(0).map(_ => [])
+        }
+
+        else {
+            this.reserve_flats = [this.startPos.flats[0], this.startPos.flats[1]]
+            this.reserve_caps = [this.startPos.caps[0], this.startPos.caps[1]]
+
+            this.pieces = new Array(this.startPos.pieces.length).fill(0).map((_, i) => {return Object.assign({}, this.startPos.pieces[i])})
+            this.board = new Array(8 * 8).fill(0).map((_, i) => {return Object.assign([], this.startPos.board[i])})
+        }
+
     }
 
     do() {
@@ -303,13 +410,20 @@ export class Game {
         }
     }
 
+    end(result: number) {
+        this.gameState = result
+        this.backend = undefined;
+    }
+
     canPlay(): boolean {
         //viewing last ply and controls current player
         return this.currentView == this.history.length && ((this.data.color >> (this.currentPly() & 1)) & 1) == 1
     }
 
     currentPly(): number {
-        return this.history.length
+        if (this.startPos == undefined)
+            return this.history.length
+        return this.history.length + this.startPos.ply
     }
 
     deselect() {

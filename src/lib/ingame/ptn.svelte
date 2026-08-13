@@ -7,6 +7,7 @@
     let a = $derived(w / h)
 
 
+    let startply = game.startPos == undefined ? 0 : game.startPos.ply
 
     function undoButton() {
         if (game.history.size <= 0) {return}
@@ -46,12 +47,12 @@
 {#if a > 1}
     <div class="large navigator">
         {#each game.history as ply, i}
-            {#if (i & 1) == 0}
-            <p> {(i >> 1) + 1}. </p>
+            {#if (i + startply & 1) == 0}
+            <p> {(i + startply >> 1) + 1}. </p>
             {/if}
             <button onclick={() => game.goto(i+1)} class={[
                 "ply",
-                (i < 2) == ((i & 1) == 0) ? "black" : "white",
+                (i + startply < 2) == (((i + startply) & 1) == 0) ? "black" : "white",
                 i >= game.currentView ? 'future' : 'past'
             ]}>
                 {moveString(ply)}
@@ -63,11 +64,11 @@
         <button class="material-symbols-outlined" onclick={() => game.reset()}>keyboard_double_arrow_left</button>
         <button class="material-symbols-outlined" onclick={() => game.undo()}>keyboard_arrow_left</button>
         {#if game.currentView > 0}
-            <p class={["ply", "past", (((game.currentView & 1) == 0) == game.currentView <= 2) ? "white" : "black"]}>
-                &nbsp{(game.currentView + 1 >> 1)}. {moveString(game.history[game.currentView - 1])}&nbsp
+            <p class={["ply", "past", (((game.currentView + startply & 1) == 0) == game.currentView + startply <= 2) ? "white" : "black"]}>
+                &nbsp{(game.currentView + startply + 1 >> 1)}. {moveString(game.history[game.currentView - 1])}&nbsp
             </p>
         {:else}
-            <p class={["ply", "past", (game.currentView & 1) == 0 ? "white" : "black"]}> &nbsp1. -&nbsp </p>
+            <p class={["ply", "past", (game.currentView + startply & 1) == 1 ? "white" : "black"]}> &nbsp{(startply + 1) >> 1}. -&nbsp </p>
         {/if}
         <button class="material-symbols-outlined" onclick={() => game.do()}>keyboard_arrow_right</button>
         <button class="material-symbols-outlined" onclick={() => game.goto(game.history.length)}>keyboard_double_arrow_right</button>
@@ -140,26 +141,32 @@
         border-style: solid;
     }
 
-    .white.past {
+    .white {
+        grid-column: 2 / 3;
         border-color: var(--player1);
-        background: var(--player1);
-        color: var(--player2);
-    }
-    .white.future {
-        border-color: var(--player1);
-        background: 0;
-        color: var(--textLight);
+
+        &.past {
+            background: var(--player1);
+            color: var(--player2);
+        }
+        &.future {
+            background: 0;
+            color: var(--textLight);
+        }
     }
 
-    .black.past {
+    .black {
+        grid-column: 3 / 4;
         border-color: var(--player2);
-        background: var(--player2);
-        color: var(--player1);
-    }
-    .black.future {
-        border-color: var(--player2);
-        background: 0;
-        color: var(--textLight);
+
+        &.past {
+            background: var(--player2);
+            color: var(--player1);
+        }
+        &.future {
+            background: 0;
+            color: var(--textLight);
+        }
     }
 
     .future:hover {

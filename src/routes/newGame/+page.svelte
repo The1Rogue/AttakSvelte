@@ -1,17 +1,17 @@
 
 <script lang="ts">
     import { goto } from "$app/navigation";
-    // import { addGame, send } from "$lib/socket.svelte";
     import { addGame, search, type GameData } from "$lib/backends/connector.svelte";
+    import { GameStateStrings } from "$lib/backends/playtak_stable.svelte";
 
-    import { Game, GameStateStrings, parsePtn } from "$lib/ingame/game.svelte"
+    import { Game, parsePtn, TPSPosition } from "$lib/ingame/game.svelte"
     import { addToast } from "$lib/ui/toast.svelte";
 
 
     const ptnRegex = /(?:[SFC]?[a-g][1-8](?![<+\->])|[1-8]?[a-g][1-8][<+\->][1-8]*\*?)/g
     const commentRegex = /{[^{]*}|[0-9]+\./g //also includes move numbering
 
-    //poor mans enum
+    //poor mans enum (enums arent allowed inside script tags for some reason, they work in ts files tho)
     const Rated = 0
     const Unrated = 1
     const Tournament = 2
@@ -85,16 +85,28 @@
                 caps: caps,
                 rated: false,
                 tourney: false
-            }))
+            }, undefined))
 
         } else {
-            let p1 = "White"
-            let p2 = "Black"
             let result = 0
-            size = -1
-            flats = -1
-            caps = -1
-            komi = 0
+            let tps = undefined
+
+            let gameData: GameData = {
+                id: 0,
+                p1: "White",
+                p2: "Black",
+                size: -1,
+                time: 0,
+                inc: 0,
+                extra: 0,
+                trigger: 0,
+                color: 3,
+                halfkomi: 0,
+                flats: -1,
+                caps: -1,
+                rated: false,
+                tourney: false
+            }
 
             let ptn2 = ptn
 
@@ -104,83 +116,57 @@
                 ptn2 = ptn2.slice(i + 1).trimStart()
 
                 if (head.startsWith("Player1")) {
-                    p1 = head.slice(9,-1)
+                    gameData.p1 = head.slice(9,-1)
                 } else if (head.startsWith("Player2")) {
-                    p2 = head.slice(9,-1)
+                    gameData.p2 = head.slice(9,-1)
                 } else if (head.startsWith("Size")) {
-                    size = parseInt(head.slice(6,-1))
+                    gameData.size = parseInt(head.slice(6,-1))
                 } else if (head.startsWith("Komi")) {
-                    komi = parseFloat(head.slice(6,-1))
+                    gameData.halfkomi = parseFloat(head.slice(6,-1)) * 2
                 } else if (head.startsWith("Flats")) {
-                    flats = parseInt(head.slice(7, -1))
+                    gameData.flats = parseInt(head.slice(7, -1))
                 } else if (head.startsWith("Caps")) {
-                    caps = parseInt(head.slice(6, -1))
+                    gameData.caps = parseInt(head.slice(6, -1))
                 } else if (head.startsWith("Opening")) {
                     if (head != `Opening "swap`) {
                         addToast("non-swap openings not yet supported!", true)
-                        size = 6
-                        komi = 2
                         return
                     }
                 } else if (head.startsWith("Clock")) {
                     //TODO
                 } else if (head.startsWith("TPS")) {
-                    
-                    let rows = head.slice(6,-2).split("/")
-                    for (let row of rows) {
-                        let sqs = row.split(",")
-                        for (let sq of sqs) {
-                            if (sq.startsWith("x")){
+                    tps = head.slice(5,-1)
 
-                            } else {
-                                
-                            }
-                        }
-                    }
-
-                    addToast("Custom starting position not yet supported!", true)
-
-                    size = 6
-                    komi = 2
-                    return
                 } else if (head.startsWith("Result")) {
                     result = GameStateStrings.indexOf(head.slice(8,-1))
                 }
             }
 
             
-            if (!(size >= 3 && size <= 8)) {
+            let startPos
+            if (tps != undefined) {
+                [startPos, gameData.size] = TPSPosition.fromTPS(tps, flats, caps)
+                if (startPos == undefined) {
+                    addToast("Invalid TPS", true)
+                    return
+                }
+            }
+
+            else if (!(gameData.size >= 3 && gameData.size <= 8)) {
                 addToast("Could not determine board size", true)
-                size = 6
-                komi = 2
                 return
             }
-            if (flats < 0) {
-                flats = defaultflats[size-3]
+            if (gameData.flats < 0) {
+                gameData.flats = defaultflats[size-3]
             }
-            if (caps < 0) {
-                caps = (size - 3) >> 1
+            if (gameData.caps < 0) {
+                gameData.caps = (size - 3) >> 1
             }
 
             ptn2 = ptn2.replaceAll(commentRegex, "")
             let moves = ptn2.matchAll(ptnRegex)
-            let game = new Game({
-                id: 0,
-                p1: p1,
-                p2: p2,
-                size: size,
-                time: 0,
-                inc: 0,
-                extra: 0,
-                trigger: 0,
-                color: 3,
-                halfkomi: komi * 2,
-                flats: flats,
-                caps: caps,
-                rated: false,
-                tourney: false
-            })
 
+            let game = new Game(gameData, startPos)
             game.gameState = result
 
             for (let move of moves) {

@@ -3,10 +3,9 @@
 <script lang="ts">
 
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    import { Game, GameStateStrings } from "$lib/ingame/game.svelte";
+    import { Game } from "$lib/ingame/game.svelte";
     import { addGame } from "$lib/backends/connector.svelte";
-    import { parseMove } from "$lib/backends/playtak_stable.svelte";
-    import newGame from "$lib/assets/newGame.svg"
+    import { GameStateStrings, parseMove } from "$lib/backends/playtak_stable.svelte";
     let { game, odd } = $props()
     
     let result = GameStateStrings.indexOf(game.result)
@@ -49,7 +48,7 @@
             caps: game.capstones,
             rated: game.unrated == 0,
             tourney: game.tournament == 1
-        })
+        }, undefined)
 
         for (const m of game.notation.split(",")) {
             if (m == "") {break}
