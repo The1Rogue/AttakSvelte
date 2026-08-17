@@ -40,7 +40,7 @@
         {#if chat[2] && !open}<div class="notif"></div>{/if}
         
         {#if chat[0] != 0}
-            <button class="close material-symbols-outlined" onclick={() => {
+            <button class="close rounded_button material-symbols-outlined" onclick={() => {
                 delete chats[room]
                 if (chat[0] == 1) {
                     leave_room(room)
@@ -61,7 +61,7 @@
             setTimeout(() => {this[0].focus()}, 10) //maintain focus on input
         }}>
         <input placeholder=">" bind:value={current_msg}/>
-        <button class="material-symbols-outlined">Send</button>
+        <button class="material-symbols-outlined rounded_button">Send</button>
     </form> 
 </div>
 <style>

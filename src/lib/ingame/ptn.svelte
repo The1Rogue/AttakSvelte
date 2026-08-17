@@ -40,9 +40,9 @@
 <div class="holder">
 {#if game.data.color != 0}
     <div class="metabuttons">
-        <button class="material-symbols-outlined" style:background={["", "#5397f4", "#9F7F00", ""][game.undoReq]} onclick={() => undoButton()}>undo</button>
-        <button class="material-symbols-outlined" onclick={() => resignButton()}>flag</button>
-        <button class="material-symbols-outlined" style:background={["", "#5397f4", "#9F7F00", ""][game.drawReq]} onclick={() => drawButton()}>handshake</button>
+        <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.undoReq]} onclick={() => undoButton()}>undo</button>
+        <button class="material-symbols-outlined rounded_button" onclick={() => resignButton()}>flag</button>
+        <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.drawReq]} onclick={() => drawButton()}>handshake</button>
     </div>
 {/if}
 {#if a > 1}

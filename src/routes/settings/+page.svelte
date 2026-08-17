@@ -28,7 +28,7 @@
 
         <div class="setting">
             <h3>theme:</h3>
-            <select bind:value={selectedTheme} onchange={() => setTheme(builtInThemes[selectedTheme][1])}>
+            <select class="rounded_button" bind:value={selectedTheme} onchange={() => setTheme(builtInThemes[selectedTheme][1])}>
                 {#each builtInThemes as theme, i}
                     <option value={i}>{theme[0]}</option>
                 {/each}
@@ -38,7 +38,7 @@
         <div class="setting">
             <h3>import custom theme:</h3>
             <textarea placeholder="custom theme" bind:value={customTheme}></textarea>
-            <button onclick={() => setTheme(customTheme)}>Apply</button>
+            <button class="rounded_button" onclick={() => setTheme(customTheme)}>Apply</button>
         </div>
         <div class="setting">
             <h3>animation speed:</h3>
@@ -66,7 +66,7 @@
                 <input bind:value={oldPass} type="password" placeholder="old password" autocomplete="current-password"/>
                 <input bind:value={newPass} type="password" placeholder="new password" autocomplete="new-password"/>
                 <input bind:value={newPass2} type="password" placeholder="repeat new password" autocomplete="new-password"/>
-                <button>Save</button>
+                <button class="rounded_button">Save</button>
             </form>
         </div>
     </div>

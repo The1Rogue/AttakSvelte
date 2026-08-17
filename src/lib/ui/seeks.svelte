@@ -69,7 +69,7 @@
         <summary class="subitem tab">Create Game</summary>
         <div class="splitlist ui_panel">
             <input type="text" placeholder="opponent" bind:value={opponent}/> 
-            <label class="input_label">Game Type:<select bind:value={gametype}>
+            <label class="input_label">Game Type:<select class="rounded_button" bind:value={gametype}>
                 <option value={1}>Rated</option>
                 <option value={0}>Unrated</option>
                 <option value={2}>Tournament</option>

@@ -43,7 +43,7 @@
 
     <br/>
 
-    <label class="input_label">Result: <select bind:value={options.game_result}>
+    <label class="input_label">Result: <select class="rounded_button" bind:value={options.game_result}>
         <option value=""> -- </option>
         <option value="X-0"> X-0 </option>
         <option value="R-0"> R-0 </option>
@@ -55,7 +55,7 @@
         <option value="0-F"> 0-F </option>
         <option value="0-1"> 0-1 </option>
     </select></label>
-    <label class="input_label">Type: <select bind:value={options["type"]}>
+    <label class="input_label">Type: <select class="rounded_button" bind:value={options["type"]}>
         <option value=""> -- </option>
         <option value="tournament"> Tournament </option>
         <option value="normal"> Rated </option>
@@ -64,7 +64,7 @@
 
     <br/>
 
-    <label class="input_label">Size: <select bind:value={options.size}>
+    <label class="input_label">Size: <select class="rounded_button" bind:value={options.size}>
         <option value=""> -- </option>
         <option value=3> 3x3 </option>
         <option value=4> 4x4 </option>
@@ -74,7 +74,7 @@
         <option value=8> 8x8 </option>
     </select></label>
 
-    <label class="input_label">Komi: <select bind:value={options.komi}>
+    <label class="input_label">Komi: <select class="rounded_button" bind:value={options.komi}>
         <option value=""> -- </option>
         <option value=0> 0 </option>
         <option value=1> 0.5 </option>
@@ -94,7 +94,7 @@
 
     <br/>
 
-    <button onclick={() => applyFilters()}>Search</button>
+    <button class="rounded_button" onclick={() => applyFilters()}>Search</button>
     </div>
     </details>
 

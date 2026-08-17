@@ -43,7 +43,7 @@ textarea {
     }
 }
 
-.rounded_button, button, select {
+.rounded_button {
     border: 1px solid var(--primary);
     border-radius: .5em;
     background: var(--ui);

@@ -189,7 +189,7 @@
         </summary>
         <div class="ui_panel">
             <label>Opponent: <br/><input bind:value={opponent} type=text title="opponent who may accept to seek, leave blank to allow anyone to accept"/></label>
-            <label>Your Color: <br/><select bind:value={color}>
+            <label>Your Color: <br/><select class="rounded_button" bind:value={color}>
                 <option value="A">Random</option>
                 <option value="W">White</option>
                 <option value="B">Black</option>
@@ -197,7 +197,7 @@
 
             <!-- presets -->
 
-            <label>Board Size:<br/><select bind:value={size}>
+            <label>Board Size:<br/><select class="rounded_button" bind:value={size}>
                 <option value={3}>3x3</option>
                 <option value={4}>4x4</option>
                 <option value={5}>5x5</option>
@@ -206,7 +206,7 @@
                 <option value={8}>8x8</option>
             </select></label>
             <br/>
-            <label>Game Type: <br/><select bind:value={gametype} title="whether the game is rated or not, tournament is the same as rated, just used by automated systems to recognize tournament games">
+            <label>Game Type: <br/><select class="rounded_button" bind:value={gametype} title="whether the game is rated or not, tournament is the same as rated, just used by automated systems to recognize tournament games">
                 <option value="Rated">Rated</option>
                 <option value="Unrated">Unrated</option>
                 <option value="Tournament">Tournament</option>
@@ -220,7 +220,7 @@
             <label>Capstones: <br/><input type=number min=0 max=5 bind:value={caps}/></label>
           
 
-            <button onclick={() => createSeek()}>Create Seek</button>
+            <button class="rounded_button" onclick={() => createSeek()}>Create Seek</button>
         </div>
 
     </details>
@@ -230,7 +230,7 @@
             Analysis Board
         </summary>
         <div>            
-            <label>Board Size:<br/><select bind:value={size}>
+            <label>Board Size:<br/><select class="rounded_button" bind:value={size}>
                 <option value={3}>3x3</option>
                 <option value={4}>4x4</option>
                 <option value={5}>5x5</option>
@@ -243,7 +243,7 @@
             <label>Capstones: <br/><input type=number min=0 max=5 bind:value={caps}/></label>
 
             <label for=ptn >PTN/TPS:</label><textarea id=ptn rows=10 bind:value={ptn}></textarea>
-            <button onclick={() => createScratch()}>Create Game</button>
+            <button class="rounded_button" onclick={() => createScratch()}>Create Game</button>
         </div>
     </details>
 </div>
