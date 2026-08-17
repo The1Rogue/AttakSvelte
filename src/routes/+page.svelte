@@ -4,7 +4,9 @@
     import Events from '$lib/ui/tourneys.svelte'
     import Login from "$lib/ui/login.svelte"
     
-    import { isConnected } from '$lib/backends/connector.svelte'; 
+    import { addGame, isConnected } from '$lib/backends/connector.svelte'; 
+    import Board from '$lib/ingame/board.svelte';
+    import { daily } from '$lib/backends/puzzles.svelte';
 
 </script>
 
@@ -17,6 +19,11 @@
         <Login/>
     {/if}
     <Events/>
+
+    <div class=daily onclick={() => addGame(daily)} >
+        <p>Daily Puzzle</p>
+        <Board game={daily} bare={true} />
+    </div>
 </div>
 
 
@@ -42,6 +49,18 @@
             padding: 20px 0;
             width: 100%;
             grid-template-columns: 1fr;
+        }
+    }
+
+    .daily {
+        background-color: var(--ui);
+        border-radius: 5px;
+        padding: 1px 1px 10px;
+        p {
+            margin: .25em;
+        }
+        &:hover {
+            background-color: var(--accent);
         }
     }
 </style>

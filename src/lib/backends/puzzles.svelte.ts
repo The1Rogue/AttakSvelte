@@ -5,7 +5,7 @@ import type { GameData } from "./playtak_stable.svelte";
 
 
 type Puzzle = {
-    startpos: string
+    startpos: TPSPosition
     moves: Array<number> //todo, alternate lines?
 }
 
@@ -45,3 +45,20 @@ class PuzzleBackend implements GameBackend {
 }
 
 export const puzzleBackend = new PuzzleBackend()
+
+export const daily = new Game({
+    id: 1,
+    p1: (puzzle.startpos.ply & 1) == 0 ? "You" : "Opponent",
+    p2: (puzzle.startpos.ply & 1) == 0 ? "Opponent" : "You",
+    color: (puzzle.startpos.ply & 1) + 1,
+    size: 5, //TODO
+    time: 0,
+    inc: 0,
+    halfkomi: 2,
+    flats: 21, //TODO
+    caps: 1, //TODO
+    rated: false,
+    tourney: false,
+    trigger: 0,
+    extra: 0,
+}, puzzle.startpos, puzzleBackend)

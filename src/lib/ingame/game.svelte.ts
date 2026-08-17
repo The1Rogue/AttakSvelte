@@ -1,5 +1,5 @@
 
-import type { Backend, GameData } from "$lib/backends/connector.svelte"
+import type { GameBackend, GameData } from "$lib/backends/connector.svelte"
 
 //move: number
 //
@@ -142,7 +142,7 @@ export class Game {
     startPos: TPSPosition | undefined
 
     data: GameData
-    backend: Backend | undefined
+    backend: GameBackend | undefined
     pieces: Array<Piece> = $state([])
     board: Array<Array<number>> = $state([])
 
@@ -172,10 +172,12 @@ export class Game {
 
     highlight: Array<number> = $state([])
 
-    constructor(info: GameData, startPos: TPSPosition | undefined, backend: Backend | undefined = undefined) {
+    constructor(info: GameData, startPos: TPSPosition | undefined, backend: GameBackend | undefined = undefined) {
         this.data = info
         this.backend = backend
 
+        this.timew = info.time
+        this.timeb = info.time
 
         this.startPos = startPos
         if (startPos == undefined) {

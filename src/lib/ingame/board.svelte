@@ -6,8 +6,7 @@
     import GameEnd from "$lib/ingame/gameEnd.svelte"
     import { currentTheme } from "$lib/theme.svelte";
     
-    let { game } = $props()  
-
+    let { game, bare } = $props()  
 
     function onKeyDown(e: KeyboardEvent) {
         switch(e.keyCode) {
@@ -37,14 +36,21 @@
         <GameEnd game={game} hide={() => showMenu = false}/>
     {/if}
 
-    <div class="head">
-        <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1} - {timew}</p>
-        <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{timeb} - {game.data.p2}</p>
-        <i class="fill-primary material-symbols-outlined" onclick={() => showMenu = true}>menu</i>
-        <!-- <svg viewBox="0 0 448 512" class="fill-primary" onclick={() => showMenu = true}>
-            <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path>
-        </svg> -->
-    </div>
+    {#if !bare}
+        <div class="head">
+            {#if game.timew > 0 || game.timeb > 0}
+                <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1} - {timew}</p>
+                <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{timeb} - {game.data.p2}</p>
+            {:else}
+                <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1}</p>
+                <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{game.data.p2}</p>
+            {/if}
+            <i class="fill-primary material-symbols-outlined" onclick={() => showMenu = true}>menu</i>
+            <!-- <svg viewBox="0 0 448 512" class="fill-primary" onclick={() => showMenu = true}>
+                <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path>
+            </svg> -->
+        </div>
+    {/if}
     <div class="board" role="none">
         {#each {length: game.data.size}, c}
                 {#each {length: game.data.size}, r}
@@ -74,6 +80,7 @@
                 {/each}
         {/each}
         {#each game.pieces as piece, i (piece.id)}
+            {#if !bare || piece.position > 0}
                 <button
                     onclick={() => game.clickReserve((i&1) + 1, piece.type == 2 ? 2 : 0 )}
                     class={["piece",
@@ -90,9 +97,12 @@
                     style:--z={piece.position >= 0 ? piece.height : ((i>>1) - game.data.caps) / (game.data.caps + game.data.flats)}
                     style:--h={piece.position >= 0 ? game.board[piece.position].length : 0}
                 ></button>
+            {/if}
         {/each} 
     </div>
-    <div class="reserveHolder" tabindex="-1" onclick={() => game.clickReserveBar()}>
+    <div class="reserveHolder"
+        style:display={bare ? "none" : "block"} 
+        tabindex="-1" onclick={() => game.clickReserveBar()}>
     </div>
 </div>
 <style>
@@ -102,7 +112,6 @@
         flex-direction: column;
         position: relative;
 
-        aspect-ratio: var(--size)/calc(var(--size) + .75);
         /* this is equivalent to a max-height of 100% */
         /* but that cant be set because the height is dynamic */
         max-width: min(100%, calc(var(--size) * (100vh - 80px - 1.5em) / (var(--size) + .75)));
