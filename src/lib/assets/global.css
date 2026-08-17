@@ -2,6 +2,7 @@
     color: var(--textLight);
     font-family:Ubuntu; 
     font-weight: 400;
+    scrollbar-width: none;
 }
 
 body {

@@ -29,10 +29,9 @@
 
 <style>
     .main {
-        overflow-x: hidden;
-        overflow-y: scroll;
         padding: 20px 12.5%;
-        height: calc(100% - 40px);
+        min-height: calc(100% - 40px);
+
         width: 75%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -41,7 +40,7 @@
         justify-items: stretch;
         align-items: start;
         gap: 20px;
-        scrollbar-width: none;
+        background: var(--secondary);
     }
 
     @media(max-aspect-ratio: 1/1) {
@@ -56,6 +55,7 @@
         background-color: var(--ui);
         border-radius: 5px;
         padding: 1px 1px 10px;
+        
         p {
             margin: .25em;
         }
