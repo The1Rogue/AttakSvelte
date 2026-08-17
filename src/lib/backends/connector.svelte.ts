@@ -79,14 +79,13 @@ export function isConnected(): boolean {
     return ACTIVE_BACKEND.connected
 }
 
-export function connect(backend: number, username: string, password: string) {
+export function connect(username: string, password: string) {
     if (isConnected()) {
-        return //TODO
+        addToast("You are already connected", false)
+        return
     }
 
-    if (ACTIVE_BACKEND.attempt_login(username, password)) {
-        // active_backend = backend
-    } else {
+    if (!ACTIVE_BACKEND.attempt_login(username, password)) {
         addToast("Failed To Login", true) //TODO toast already added by backend itself?
     }
 }

@@ -17,7 +17,7 @@
 	let { children } = $props();
 
 	if ((!isConnected()) && localStorage.getItem("username") != undefined) {
-		connect(0, localStorage.getItem("username") || "", localStorage.getItem("pass") || "")
+		connect(localStorage.getItem("username") || "", localStorage.getItem("pass") || "")
 	}
 
 	let w = $state(1)

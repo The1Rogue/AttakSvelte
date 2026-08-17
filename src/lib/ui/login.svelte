@@ -11,8 +11,7 @@
     function login() {
         localStorage.setItem("username", username);
         localStorage.setItem("pass", password);
-        // attempt_connect();
-        connect(0, username, password)
+        connect(username, password)
     }
 
     function loginGuest() {
@@ -32,8 +31,7 @@
             console.log("crypto not found! using guest without token!")
         }
         localStorage.setItem("pass", token);
-        // attempt_connect();
-        connect(0, "Guest", token)
+        connect("Guest", token)
     }
 
     function register() {

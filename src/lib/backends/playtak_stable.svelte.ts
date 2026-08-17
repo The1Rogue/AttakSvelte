@@ -38,11 +38,10 @@ enum Color {
 
 
 class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
-    name: string = "Playtak"
-    connected: boolean = false
+    connected: boolean = $state(false)
     heartbeat: any = -1 //type doenst seem to be number, but i cant find out what else it is....
     ws: WebSocket | undefined
-    username: string = ""
+    username: string = $state("")
     password: string = ""
     messageChain = Promise.resolve()
 
@@ -60,7 +59,6 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         this.ws.onclose = this.handle_close
         this.ws.onerror = this.handle_error
         this.heartbeat = setInterval(() => this.ping(), 10_000);
-        this.connected = true
         return true
     }
 
@@ -137,6 +135,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
             this.ws?.send("Login " + this.username + " " + this.password)
         } else if (msg.startsWith("Welcome ")) {
             this.username = msg.slice(8, -1)
+            this.connected = true
         }
 
         else if (msg.startsWith("Seek new")) {
@@ -310,10 +309,15 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         } else if (msg.startsWith("Error ")) {
             addToast(msg.slice(6), true)
         } else if (msg == "NOK") {
-            addToast("The server disliked something...", true)
+            if (!this.connected) { //this means we havent passed authorization yet, so that failed
+                this.disconnect()
+                addToast("Failed to Login", true)
+            } else {
+                addToast("The server disliked something...", true)
+            }
         } else if (msg == "Authentication failure") {
             addToast("Invalid Login", true)
-            this.ws?.close()
+            this.disconnect()
         }
 
         //Online
