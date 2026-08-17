@@ -2,7 +2,7 @@
 
 import { Capacitor } from '@capacitor/core';
 
-import type { Backend } from "$lib/backends/connector.svelte"
+import type { GameBackend, ChatBackend, OnlineBackend } from "$lib/backends/connector.svelte"
 
 import { addDirect, addMsg, addRoom } from "$lib/chat/chats.svelte"
 import { player_seeks, bot_seeks, ongoing, addGame, getGame, disconnect } from "$lib/backends/connector.svelte"
@@ -37,8 +37,9 @@ enum Color {
 }
 
 
-export class PlaytakStable implements Backend {
+class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
     name: string = "Playtak"
+    connected: boolean = false
     heartbeat: any = -1 //type doenst seem to be number, but i cant find out what else it is....
     ws: WebSocket | undefined
     username: string = ""
@@ -59,14 +60,17 @@ export class PlaytakStable implements Backend {
         this.ws.onclose = this.handle_close
         this.ws.onerror = this.handle_error
         this.heartbeat = setInterval(() => this.ping(), 10_000);
+        this.connected = true
         return true
     }
 
     disconnect() {
+        this.connected = false
         this.ws?.send("quit")
+        this.ws = undefined
     }
 
-    search(game: GameData) {
+    requestGame(game: GameData) {
         this.ws?.send(`Seek ${game.size} ${game.time} ${game.inc} ${["A", "W", "B", "A"][game.color]} ${game.halfkomi} ${game.flats} ${game.caps} ${game.rated ? 0 : 1} ${game.tourney ? 1 : 0} ${game.trigger} ${game.extra} ${game.p2}`)
     }
 
@@ -452,3 +456,5 @@ function moveString(move: number): string {
 
     return s
 }
+
+export const playtakStableBackend = new PlaytakStable()

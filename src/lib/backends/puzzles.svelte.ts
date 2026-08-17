@@ -1,5 +1,5 @@
 import { Game, TPSPosition } from "$lib/ingame/game.svelte";
-import {type Backend } from "./connector.svelte";
+import type { GameBackend } from "./connector.svelte";
 import type { GameData } from "./playtak_stable.svelte";
 
 
@@ -14,19 +14,10 @@ export const puzzle = {
     moves: [0x191, 0x40, 0x683, 0x199, 0x250]
 } 
 
-//theres a lot of redundant fluff here, perhaps i could simplify?
-//possible splits: chatbackend, onlinebackend, historybackend
-export class PuzzleBackend implements Backend {
-    name = "Puzzle"
-    username = ""
-
-    attempt_login(username: string, password: string): boolean {return true}
-    disconnect() {}
-
-    search(game: GameData){}
-    acceptGame(id: number){}
-    spectate(id: number){}
-    send_move(move: number, game: Game){
+class PuzzleBackend implements GameBackend {   
+    requestGame(game: GameData) {}
+    
+    send_move(move: number, game: Game) {
         let l = game.history.length
         if (move == puzzle.moves[l - 1]) {
             if (l == puzzle.moves.length) {
@@ -38,25 +29,19 @@ export class PuzzleBackend implements Backend {
             game.undoReq |= 1
         }
     }
-    requestUndo(game: Game, retract: boolean){
+
+    requestUndo(game: Game, retract: boolean) {
         if ((game.undoReq & 1) == 1) {
             game.removeLast()
             game.undoReq = 0
         }
     }
-    requestDraw(game: Game, retract: boolean){
+    requestDraw(game: Game, retract: boolean) {
         //TODO!
     }
-    resign(game: Game){
+    resign(game: Game) {
         //TODO!
     }
-
-    shout(msg: string){}
-    send_dm(user: string, msg: string){}
-    send_room(room: string, msg: string){}
-    leave_room(room: string){}
-
-    async get_rating(user: string) {return 0}
-    async get_history(options: Object) {return []}
 }
 
+export const puzzleBackend = new PuzzleBackend()

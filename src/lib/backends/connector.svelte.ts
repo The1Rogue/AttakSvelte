@@ -2,8 +2,7 @@
 import { goto } from "$app/navigation"
 import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
-import { PlaytakStable } from "./playtak_stable.svelte"
-import { PuzzleBackend } from "./puzzles.svelte"
+import { playtakStableBackend } from "./playtak_stable.svelte"
 
 enum Color {
     Neither = 0,
@@ -29,34 +28,42 @@ export type GameData = {
     tourney: boolean
 }
 
-export interface Backend {
-    name: string,
+export interface ChatBackend {
+    shout: (msg: string) => void,
+    send_dm: (user: string, msg: string) => void,
+    send_room: (room: string, msg: string) => void,
+    leave_room: (room: string) => void,
+}
+
+export interface OnlineBackend {
     username: string,
+    connected: boolean,
 
     attempt_login: (username: string, password: string) => boolean,
     disconnect: () => void,
 
-    search: (game: GameData) => void,
     acceptGame: (id: number) => void,
     spectate: (id: number) => void,
+    
+    get_rating: (user: string) => Promise<number>,
+    get_history: (options: Object) => Promise<Array<Object>>,
+}
+
+export interface GameBackend {
+    requestGame: (game: GameData) => void,
     send_move: (move: number, game: Game) => void,
 
     requestUndo: (game: Game, retract: boolean) => void,
     requestDraw: (game: Game, retract: boolean) => void,
     resign: (game: Game) => void,
-
-    shout: (msg: string) => void,
-    send_dm: (user: string, msg: string) => void,
-    send_room: (room: string, msg: string) => void,
-    leave_room: (room: string) => void,
-
-    get_rating: (user: string) => Promise<number>,
-    get_history: (options: Object) => Promise<Array<Object>>,
 }
 
-const backends: Array<Backend> = [new PlaytakStable(), new PuzzleBackend()]
 
-let active_backend: number = $state(-1)
+const ACTIVE_BACKEND = playtakStableBackend
+
+// const backends: Array<OnlineBackend> = [playtakStableBackend]
+
+// let active_backend: number = $state(-1)
 
 let rating_cache: {[key: string]: number} = {}
 export let games: Array<Game>                      = $state([])
@@ -65,40 +72,38 @@ export let player_seeks: {[key: number]: GameData} = $state({})
 export let bot_seeks: {[key: number]: GameData}    = $state({})
 
 export function getUsername(): string {
-    if (active_backend < 0) {return ""}
-    return backends[active_backend].username
+    return ACTIVE_BACKEND.username
 }
 
 export function isConnected(): boolean {
-    return active_backend >= 0
+    return ACTIVE_BACKEND.connected
 }
 
 export function connect(backend: number, username: string, password: string) {
-    if (active_backend >= 0) {
+    if (isConnected()) {
         return //TODO
     }
 
-    if (backends[backend].attempt_login(username, password)) {
-        active_backend = backend
+    if (ACTIVE_BACKEND.attempt_login(username, password)) {
+        // active_backend = backend
     } else {
         addToast("Failed To Login", true) //TODO toast already added by backend itself?
     }
 }
 
 export function disconnect() {
-    if (active_backend < 0) { return }
+    if (!ACTIVE_BACKEND.connected) { return }
 
     games.length = 0
     for (const id in ongoing) {delete ongoing[id]}
     for (const id in player_seeks) {delete player_seeks[id]}
     for (const id in bot_seeks) {delete bot_seeks[id]}
 
-    //clean rating cache? seems inpractical but might be needed if switching backend    
+    //clean rating cache?
     
     goto("/")
 
-    backends[active_backend].disconnect()
-    active_backend = -1
+    ACTIVE_BACKEND.disconnect()
 }
 
 export function addGame(game: Game) {
@@ -126,44 +131,43 @@ export function closeGame(id: number) {
 }
 
 export function shout(msg: string) {
-    backends[active_backend].shout(msg)
+    playtakStableBackend.shout(msg)
 }
 
 export function send_dm(user: string, msg: string) {
-    backends[active_backend].send_dm(user, msg)
+    playtakStableBackend.send_dm(user, msg)
 }
 
 export function send_room(room: string, msg: string) {
-    backends[active_backend].send_room(room, msg)
+    playtakStableBackend.send_room(room, msg)
 }
 
 export function leave_room(room: string) {
-    backends[active_backend].leave_room(room)
+    playtakStableBackend.leave_room(room)
 }
 
 export function search(game: GameData) {
-    backends[active_backend].search(game)
+    ACTIVE_BACKEND.requestGame(game)
 }
 
 export function acceptGame(id: number) {
-    backends[active_backend].acceptGame(id)
+    ACTIVE_BACKEND.acceptGame(id)
 }
 
 export function spectate(id: number) {
     if (games.find((e) => e.data.id == id)) {return}
-    backends[active_backend].spectate(id)
+    ACTIVE_BACKEND.spectate(id)
 }
 
 export async function get_rating(user: string) {
     let r = rating_cache[user]
     if (r == undefined) {
-        r = await backends[active_backend].get_rating(user)
+        r = await ACTIVE_BACKEND.get_rating(user)
         rating_cache[user] = r
     }
     return r
 }
 
 export async function get_history(options: Object) {
-    return backends[0].get_history(options)
-    // return backends[active_backend].get_history()
+    return ACTIVE_BACKEND.get_history(options)
 }
