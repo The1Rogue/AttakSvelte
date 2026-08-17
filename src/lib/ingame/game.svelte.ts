@@ -280,6 +280,7 @@ export class Game {
 
     reset() {
         this.currentView = 0
+        this.highlight = []
 
         if (this.startPos == undefined) {
             this.reserve_flats = [this.data.flats, this.data.flats]
@@ -306,6 +307,7 @@ export class Game {
     do() {
         if (this.currentView == this.history.length) {return}
         let move = this.history[this.currentView++]
+        let ply = this.startPos == undefined ? this.currentView : this.currentView + this.startPos.ply
         let idx = move & 0x3F
         this.highlight.length = 0
         if ((move >> 8) > 0) { //its a spread
@@ -332,7 +334,7 @@ export class Game {
             }
 
         } else { //its a placement
-            let color = (this.currentView & 1) ^ (this.currentView <= 2 ? 0 : 1)
+            let color = (ply & 1) ^ (ply <= 2 ? 0 : 1)
             let id = 0
             if ((move >> 6) == 2) { 
                 id = this.reserve_caps[color]-- * 2 + color - 2
