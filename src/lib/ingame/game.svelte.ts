@@ -486,25 +486,23 @@ export class Game {
     clickReserveBar() {
         if (!this.canPlay()) {return;}
         let c = this.currentPly()
-        this.clickReserve(((c & 1) ^ (c < 2 ? 1 : 0)) + 1, PieceType.Flat)
+        this.clickReserve(PieceType.Flat)
     }
 
-    clickReserve(color: Color, type: PieceType) {
+    clickReserve(type: PieceType) {
         if (!this.canPlay()) {return;}
 
         let c = this.currentPly()
-
-        if ((color != (c % 2 + 1)) != (c < 2)) { // correct color + swap opening
-            this.deselect()
-            return
-        }
-
+       
+        let color = (c & 1)
+        if (c < 2) {color ^= 1}
+    
         if (type == PieceType.Cap && c < 2) {
             this.deselect()
             return
         }
 
-        let id = (type == PieceType.Cap ? this.reserve_caps[color - 1] : this.data.caps + this.reserve_flats[color - 1]) * 2 + color - 3
+        let id = (type == PieceType.Cap ? this.reserve_caps[color] : this.data.caps + this.reserve_flats[color]) * 2 + color - 2
 
         if (this.state == State.None) {
             this.state = State.Reserve
@@ -536,7 +534,6 @@ export class Game {
     }
 
     clickPile(x: number, y: number) {
-        //TODO prevent pickup turn 1
         if (!this.canPlay()) {return;}
 
         let idx = Game.idx(x, y)
@@ -571,7 +568,8 @@ export class Game {
                 }
                 
                 this.sendMove((this.pieces[this.selectedReserve].type << 6) | idx)
-                    
+            } else if (this.currentPly() < 2) {
+                this.deselect()
             } else {
                 this.deselect()
                 this.state = State.Pile

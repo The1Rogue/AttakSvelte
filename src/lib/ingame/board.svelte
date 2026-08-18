@@ -84,7 +84,7 @@
         {#each game.pieces as piece, i (piece.id)}
             {#if !bare || piece.position > 0}
                 <button
-                    onclick={() => game.clickReserve((i&1) + 1, piece.type == 2 ? 2 : 0 )}
+                    onclick={() => game.clickReserve(piece.type)}
                     oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
                     class={["piece",
                         piece.selected ? "selected" : "",
