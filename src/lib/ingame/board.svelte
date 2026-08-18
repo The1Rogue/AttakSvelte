@@ -67,7 +67,9 @@
                         ]}
                     
                     
-                        onclick={() => game.clickPile(r, game.data.size - 1 - c)} title=""
+                        onclick={() => game.clickPile(r, game.data.size - 1 - c)} 
+                        oncontextmenu={(e) => {e.preventDefault(); game.rclickPile(r, game.data.size - 1 - c)}}
+                        title=""
                         >
                         {#if c == game.data.size - 1}
                             <p class="colLabel">{String.fromCharCode(r + 0x61)}</p>
@@ -83,6 +85,7 @@
             {#if !bare || piece.position > 0}
                 <button
                     onclick={() => game.clickReserve((i&1) + 1, piece.type == 2 ? 2 : 0 )}
+                    oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
                     class={["piece",
                         piece.selected ? "selected" : "",
                         (i&1) == 0 ? 'white' : 'black',
@@ -101,8 +104,10 @@
         {/each} 
     </div>
     <div class="reserveHolder"
-        style:display={bare ? "none" : "block"} 
-        tabindex="-1" onclick={() => game.clickReserveBar()}>
+        style:display={bare ? "none" : "block"} tabindex="-1"
+        onclick={() => game.clickReserveBar()}
+        oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
+        >
     </div>
 </div>
 <style>

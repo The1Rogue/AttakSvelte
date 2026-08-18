@@ -591,14 +591,15 @@ export class Game {
             let currentTile = this.startingTile + this.delta * distance
 
             if (idx == currentTile && this.delta == Direction.None) {
-                this.pieces[this.selectedPile.shift() ?? 0].selected = false
-                if (this.selectedPile.length == 0) {
+                this.pieces[this.selectedPile[this.totals]].selected = false
+                this.totals += 1
+                if (this.selectedPile.length == this.totals) {
                     this.state = State.None
-                    //TODO cleanup?
+                    this.totals = 0
+                    this.selectedPile = []
                 }
 
             } else if (idx == currentTile) {
-                //TODO drop without move
                 this.pieces[this.selectedPile[this.totals]].selected = false
                 this.totals += 1
                 if (this.totals == this.selectedPile.length) {
@@ -625,6 +626,79 @@ export class Game {
 
             } else {
                 //invalid position
+                this.deselect()
+            }
+        }
+    }
+
+    rclickReserve() {
+        this.deselect()
+    }
+
+    rclickPile(x: number, y: number) {
+        if (this.state == State.Reserve) {
+            this.deselect()
+        } else if (this.state == State.Pile) {
+            let idx = Game.idx(x, y)
+            let diff = idx - this.startingTile
+            let d = diff / this.delta
+            
+            let distance = (((this.drops & 0x7F) * 0x204081 & 0x1111111) % 0xF) + (this.drops >> 7)
+            let currentTile = this.startingTile + this.delta * distance
+            
+            if (currentTile == idx) {
+                if (this.drops == 0) {
+                    if (this.totals > 0) {
+                        this.totals -= 1
+                        this.pieces[this.selectedPile[this.totals]].selected = true
+                    } else {
+                        this.deselect()
+                    }
+                } else {
+                    if ((this.drops & (1 << (this.selectedPile.length - this.totals))) != 0) {
+                        this.drops ^= (1 << (this.selectedPile.length - this.totals))
+                        this.totals -= 1
+                        this.pieces[this.selectedPile[this.totals]].selected = true
+                        
+                        let prev = idx - this.delta
+                        let l = (prev == this.startingTile) ? this.totals : this.board[prev].length
+                        for (let i = this.totals; i < this.selectedPile.length; i++) {
+                            this.pieces[this.selectedPile[i]].position = prev
+                            this.pieces[this.selectedPile[i]].height = l + i - this.totals
+                        }
+
+                        if (this.drops == 0) {
+                            this.delta = Direction.None
+                        }
+
+                    } else {
+                        this.totals -= 1
+                        this.pieces[this.selectedPile[this.totals]].selected = true
+                    }
+                }
+
+            } else if ((d < 8) && (d >= 0) && (d % 1 == 0) && (d < distance)) { //its inline
+                while (currentTile != idx) {
+                    if ((this.drops & (1 << (this.selectedPile.length - this.totals))) != 0) {
+                        currentTile -= this.delta
+                        this.drops &= this.drops - 1
+                    }
+                    this.totals -= 1
+                    this.pieces[this.selectedPile[this.totals]].selected = true
+                }
+
+                let l = this.board[idx].length
+                if (idx == this.startingTile) {
+                    l = this.totals
+                    this.delta = Direction.None
+                }
+
+                for (let i = this.totals; i < this.selectedPile.length; i++) {
+                    this.pieces[this.selectedPile[i]].position = idx
+                    this.pieces[this.selectedPile[i]].height = l + i - this.totals
+                }
+
+            } else {
                 this.deselect()
             }
         }
