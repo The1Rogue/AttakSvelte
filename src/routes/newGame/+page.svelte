@@ -296,7 +296,7 @@ summary {
     border-style: none;
     background: var(--panel);
     border-radius: 5px 5px 0px 0px;
-    color: var(--textLight);
+    color: var(--text_light);
     cursor: pointer;
     text-align: center;
     list-style: none;
@@ -322,7 +322,7 @@ details div {
     border-color: var(--ui);
     border-radius: 5px;
     border-width: 10px 1px;
-    color: var(--textLight);
+    color: var(--text_light);
 }
 
 label {

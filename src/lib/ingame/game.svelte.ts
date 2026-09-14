@@ -172,7 +172,7 @@ export class Game {
 
     highlight: Array<number> = $state([])
 
-    constructor(info: GameData, startPos: TPSPosition | undefined, backend: GameBackend | undefined = undefined) {
+    constructor(info: GameData, startPos: TPSPosition | undefined = undefined, backend: GameBackend | undefined = undefined) {
         this.data = info
         this.backend = backend
 
@@ -485,7 +485,6 @@ export class Game {
 
     clickReserveBar() {
         if (!this.canPlay()) {return;}
-        let c = this.currentPly()
         this.clickReserve(PieceType.Flat)
     }
 

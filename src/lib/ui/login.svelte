@@ -76,7 +76,7 @@
 <style>
     .loginholder {
         background: var(--panel);
-        color: var(--textLight);
+        color: var(--text_light);
         border: 1px solid var(--ui);
         padding: 20px;
         border-radius: 5px;

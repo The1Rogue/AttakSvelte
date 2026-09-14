@@ -1,16 +1,16 @@
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions, a11y_consider_explicit_label -->
 
 <script lang="ts">
-    import { currentTheme } from "$lib/theme.svelte";
+    import { theme } from "$lib/theme.svelte";
 </script>
 
 
 
 <div class="board">
-    <div class="outersq {currentTheme.boardChecker ? "odd": "even"} ring2"><button class="innersq {currentTheme.boardChecker ? "even": "odd"} ring2"></button></div>
+    <div class="outersq {theme.board.checker ? "odd": "even"} ring2"><button class="innersq {theme.board.checker ? "even": "odd"} ring2"></button></div>
     <div class="outersq even ring2"><button class="innersq odd ring2"></button></div>
     <div class="outersq even ring2"><button class="innersq odd ring2"></button></div>
-    <div class="outersq {currentTheme.boardChecker ? "odd": "even"} ring1"><button class="innersq {currentTheme.boardChecker ? "even": "odd"} ring1"></button></div>
+    <div class="outersq {theme.board.checker ? "odd": "even"} ring1"><button class="innersq {theme.board.checker ? "even": "odd"} ring1"></button></div>
 
     <button type="button" title=""
         class="piece white flat"
@@ -79,7 +79,7 @@
 
 <style>
     .board {
-        background: var(--boardReserves);
+        background: var(--board_reserves);
         position: relative;
         display: grid;
         grid-template-rows: 1fr 1fr;
@@ -99,15 +99,15 @@
             left: calc(100% * (var(--x) + .25) / 2);
             font-size: min(calc(2vh / (4.75)), calc(2.5vw / 6));
 
-            border-width: var(--pieceBorder);
+            border-width: var(--piece_border);
             border-style: solid;
-            transition: var(--animSpeed);
-            box-shadow: 0 calc(var(--pieceBorder)/2 + .4em) calc(var(--pieceBorder) + .6em) var(--shadow);
+            transition: var(--anim_speed);
+            box-shadow: 0 calc(var(--piece_border)/2 + .4em) calc(var(--piece_border) + .6em) var(--shadow);
         }
 
         .highlight {
             border-color: var(--primary);
-            border-width: max(1em, var(--pieceBorder));
+            border-width: max(1em, var(--piece_border));
         }
 
     }
@@ -117,32 +117,32 @@
         grid-template-columns: min-content auto min-content;
         grid-template-rows: min-content auto min-content;
         aspect-ratio: 1;
-        width: calc(100% - 2*var(--boardGap));
+        width: calc(100% - 2*var(--board_gap));
         border: none;
-        margin: var(--boardGap);
-        border-radius: var(--boardRound);
-        transition: background var(--animSpeed);
+        margin: var(--board_gap);
+        border-radius: var(--board_round);
+        transition: background var(--anim_speed);
     }
 
     .innersq:hover {
-        background: var(--boardReserves) !important;
+        background: var(--board_reserves) !important;
     }
 
     .innersq.odd {
         &.ring1 {
-            background: color-mix(in srgb, var(--ring1) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring1) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
         &.ring2 {
-            background: color-mix(in srgb, var(--ring2) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring2) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
     }
 
     .innersq.even {
         &.ring1 {
-            background: color-mix(in srgb, var(--ring1) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring1) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
         &.ring2 {
-            background: color-mix(in srgb, var(--ring2) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring2) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
     }
 
@@ -150,10 +150,10 @@
         aspect-ratio: 1;
     }
     .outersq.odd {
-        background: var(--boardLight);
+        background: var(--board_light);
     }
     .outersq.even {
-        background: var(--boardDark);
+        background: var(--board_dark);
     }
 
     .flat {
@@ -177,19 +177,13 @@
         rotate: -45deg;
     }
     .white {
-        background: var(--player1noble);
-        border-color: var(--player1border);
-        &.flat {
-            background: var(--player1flat);
-        }
+        background: var(--white);
+        border-color: var(--white_border);
     }
 
     .black {
-        background: var(--player2noble);
-        border-color: var(--player2border);
-        &.flat {
-            background: var(--player2flat);
-        }
+        background: var(--black);
+        border-color: var(--black_border);
     }
 
 

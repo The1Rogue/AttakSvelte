@@ -1,5 +1,4 @@
 <script lang="ts">
-    // import { addGame, data, send} from '$lib/socket.svelte'
     import type { GameData } from "$lib/backends/connector.svelte"
     import { addGame, search, player_seeks, bot_seeks, ongoing, spectate } from "$lib/backends/connector.svelte";
 
@@ -198,7 +197,7 @@ label {
 
 .radioinp:has(input:checked) {
     background-color: var(--primary);
-    color: var(--textDark)
+    color: var(--text_dark)
 }
 
 

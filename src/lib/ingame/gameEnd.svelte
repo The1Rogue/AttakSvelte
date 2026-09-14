@@ -48,7 +48,7 @@
 
     .endBox {
         background-color: var(--ui);
-        color: var(--textLight);
+        color: var(--text_light);
         padding: 10px;
         border-radius: 10px;
     }

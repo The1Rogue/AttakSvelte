@@ -6,7 +6,7 @@
 
 	import Chat from '$lib/chat/chatTab.svelte';
 	import { toasts } from '$lib/ui/toast.svelte';
-	import { currentTheme, animationSpeed } from "$lib/theme.svelte"
+	import { theme, settings, colorString } from "$lib/theme.svelte"
 	import { connect, disconnect, games, getUsername, isConnected } from "$lib/backends/connector.svelte"
 
 	import { fade } from "svelte/transition";
@@ -33,42 +33,34 @@
 
 
 <div
-	style:--primary={currentTheme.colors.primary}
-	style:--secondary={currentTheme.colors.secondary}
-	style:--ui={currentTheme.colors.ui}
-	style:--accent={currentTheme.colors.accent}
-	style:--panel={currentTheme.colors.panel}
+	style:--primary={colorString(theme.ui.primary)}
+	style:--secondary={colorString(theme.ui.secondary)}
+	style:--ui={colorString(theme.ui.ui)}
+	style:--accent={colorString(theme.ui.accent)}
+	style:--panel={colorString(theme.ui.panel)}
+	style:--text_light={colorString(theme.ui.text_light)}
+	style:--text_dark={colorString(theme.ui.text_dark)}
 
-	style:--boardLight={currentTheme.colors.board1}
-	style:--boardDark={currentTheme.colors.board2}
-	style:--boardReserves={currentTheme.colors.board3}
-	style:--boardGap={currentTheme.boardStyle > 0 ? 2 * currentTheme.boardStyle-1 : 0}%
-	style:--boardRound={currentTheme.boardStyle > 0 ? 4*(currentTheme.boardStyle-1) : -50/3 * currentTheme.boardStyle}%
-	style:--pieceBorder={currentTheme.stoneborder * .5}em
+	style:--board_light={colorString(theme.board.light)}
+	style:--board_dark={colorString(theme.board.dark)}
+	style:--board_reserves={colorString(theme.board.reserves)}
+	style:--board_gap={theme.board.style > 0 ? 2 * theme.board.style-1 : 0}%
+	style:--board_round={theme.board.style > 0 ? 4*(theme.board.style-1) : -50/3 * theme.board.style}%
+	
+	style:--piece_border={theme.pieces.border_width * .5}em
+	style:--white={colorString(theme.pieces.white)}
+	style:--white_border={colorString(theme.pieces.white_border)}
+	style:--black={colorString(theme.pieces.black)}
+	style:--black_border={colorString(theme.pieces.black_border)}
 
+	style:--ring1={theme.board.rings > 0 ? colorString(theme.board.ring1) : "#0000"}
+	style:--ring2={theme.board.rings > 1 ? colorString(theme.board.ring2) : "#0000"}
+	style:--ring3={theme.board.rings > 2 ? colorString(theme.board.ring3) : "#0000"}
+	style:--ring4={theme.board.rings > 3 ? colorString(theme.board.ring4) : "#0000"}
+	style:--ring_opacity={theme.board.rings > 0 ? theme.board.ring_opacity : 0}%
 
-	style:--player1={currentTheme.colors.player1}
-	style:--player1road={currentTheme.colors.player1road}
-	style:--player1flat={currentTheme.colors.player1flat}
-	style:--player1noble={currentTheme.colors.player1special}
-	style:--player1border={currentTheme.colors.player1border}
-
-	style:--player2={currentTheme.colors.player2}
-	style:--player2road={currentTheme.colors.player2road}
-	style:--player2flat={currentTheme.colors.player2flat}
-	style:--player2noble={currentTheme.colors.player2special}
-	style:--player2border={currentTheme.colors.player2border}
-
-	style:--ring1={currentTheme.rings > 0 ? currentTheme.colors.ring1 : "#0000"}
-	style:--ring2={currentTheme.rings > 1 ? currentTheme.colors.ring2 : "#0000"}
-	style:--ring3={currentTheme.rings > 2 ? currentTheme.colors.ring3 : "#0000"}
-	style:--ring4={currentTheme.rings > 3 ? currentTheme.colors.ring4 : "#0000"}
-	style:--ringOpacity={currentTheme.rings > 0 ? currentTheme.ringOpacity : 0}%
-
-	style:--textLight={currentTheme.colors.textLight}
-	style:--textDark={currentTheme.colors.textDark}
-	style:--shadow={currentTheme.colors.umbra}
-	style:--animSpeed={animationSpeed.speed}ms
+	style:--shadow={colorString(theme.pieces.shadow)}
+	style:--anim_speed={settings.animation_speed}ms
 	style:background=var(--secondary)
 >
 <header>
@@ -136,7 +128,7 @@
 <style>
 
 a {
-	color: var(--textLight);
+	color: var(--text_light);
 	text-decoration: none;
 }
 
@@ -169,7 +161,7 @@ header > * {
 	padding: 0 1vw;
 	height: 100%;
 	align-items: center;
-	color: var(--textLight);
+	color: var(--text_light);
 	background: 0;
 	border: none;
 }
@@ -190,7 +182,7 @@ header > * {
 	height: 100%;
 	button {
 			background: var(--accent);
-			color: var(--textLight);
+			color: var(--text_light);
 			border: none;
 			padding: .75em;
 			font-size: 1.2em;
@@ -222,7 +214,7 @@ header > :not(div):hover {
 	border-radius: 20px;
 	background: #00ff3FAF;
 	z-index: 101;
-	color: var(--textDark)
+	color: var(--text_dark)
 }
 
 .error {
@@ -244,14 +236,14 @@ header > :not(div):hover {
 	padding: 3px;
 	border-radius: 0 5px 5px 0;
 	transition: padding var(--animSpeed);
-	color: var(--textDark);
+	color: var(--text_dark);
 	font-size: 2em;
 }
 
 .boardpopup:hover {
 	background: var(--accent);
 	padding-left: 10px;
-	color: var(--textLight);
+	color: var(--text_light);
 }
 
 </style>

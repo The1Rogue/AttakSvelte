@@ -4,7 +4,7 @@
 <script lang="ts">
 
     import GameEnd from "$lib/ingame/gameEnd.svelte"
-    import { currentTheme } from "$lib/theme.svelte";
+    import { theme } from "$lib/theme.svelte";
     
     let { game, bare } = $props()  
 
@@ -56,13 +56,13 @@
                 {#each {length: game.data.size}, r}
                     <div 
                         class={["outersq",
-                            ((c ^ r) & 1) == 1 && currentTheme.boardChecker ? "odd": "even",
+                            ((c ^ r) & 1) == 1 && theme.board.checker ? "odd": "even",
                             "ring" + (Math.max(Math.trunc(Math.abs(game.data.size/2 - .5 - c)), Math.trunc(Math.abs(game.data.size/2 - .5 - r))) + 1)
                         ]}
                     >
                     <button 
                         class={["innersq",
-                            ((c ^ r) & 1) == 1 && currentTheme.boardChecker ? "even": "odd",
+                            ((c ^ r) & 1) == 1 && theme.board.checker ? "even": "odd",
                             "ring" + (Math.max(Math.trunc(Math.abs(game.data.size/2 - .5 - c)), Math.trunc(Math.abs(game.data.size/2 - .5 - r))) + 1)
                         ]}
                     
@@ -149,18 +149,18 @@
     }
 
     .pwhite {
-        border: solid var(--player1);
+        border: solid var(--white);
         border-width: 1px 1px 4px 1px;
-        background-color: var(--player1);
-        color: var(--player2);
+        background-color: var(--white);
+        color: var(--black);
         border-radius: 5px 0px 0px 0px;
     }
     
     .pblack {
-        border: solid var(--player2);
+        border: solid var(--black);
         border-width: 1px 1px 4px 1px;
-        background-color: var(--player2);
-        color: var(--player1);
+        background-color: var(--black);
+        color: var(--white);
         text-align: end;
     }
 
@@ -170,21 +170,19 @@
     }
 
     .reserveHolder {
-        background-color: var(--boardReserves);
+        background-color: var(--board_reserves);
         aspect-ratio: var(--size) / .75;
         border-radius: 0 0 5px 5px;
     }
 
     .board {
-        background: var(--boardReserves);
+        background: var(--board_reserves);
         position: relative;
         display: grid;
         grid-template-rows: repeat(var(--size), 1fr);
         grid-template-columns: repeat(var(--size), 1fr);
 
         aspect-ratio: 1;
-        /* max-height: 100%;
-        max-width: 100%; */
 
         .piece {
             pointer-events: none;
@@ -195,10 +193,10 @@
 
             bottom: calc(100% * (var(--y) + .25 + (var(--z) + min(0, var(--size) - var(--h))) * .06) / var(--size));
             left: calc(100% * (var(--x) + .25) / var(--size));
-            border-width: var(--pieceBorder);
+            border-width: var(--piece_border);
             border-style: solid;
-            transition: var(--animSpeed);
-            box-shadow: 0 calc(var(--pieceBorder)/2 + .4em) calc(var(--pieceBorder) + .6em) var(--shadow);
+            transition: var(--anim_speed);
+            box-shadow: 0 calc(var(--piece_border)/2 + .4em) calc(var(--piece_border) + .6em) var(--shadow);
 
             &.overflow {
                 bottom: calc(100% * (var(--y) + .25 + var(--z) * .06) / var(--size));
@@ -234,7 +232,7 @@
 
         .highlight {
             border-color: var(--primary);
-            border-width: max(1em, var(--pieceBorder));
+            border-width: max(1em, var(--piece_border));
         }
 
     }
@@ -244,71 +242,70 @@
         grid-template-columns: min-content auto min-content;
         grid-template-rows: min-content auto min-content;
         aspect-ratio: 1;
-        width: calc(100% - 2*var(--boardGap));
+        width: calc(100% - 2*var(--board_gap));
         border: none;
-        margin: var(--boardGap);
-        border-radius: var(--boardRound);
-        transition: background var(--animSpeed);
+        margin: var(--board_gap);
+        border-radius: var(--board_round);
+        transition: background var(--anim_speed);
     }
 
     .outersq {
         aspect-ratio: 1;
     }
     .outersq.odd {
-        background: var(--boardLight);
+        background: var(--board_light);
     }
     .outersq.even {
-        background: var(--boardDark);
+        background: var(--board_dark);
     }
 
     .innersq:hover {
-        background: var(--boardReserves) !important;
+        background: var(--board_reserves) !important;
     }
 
     .innersq.odd {
         &.ring1 {
-            background: color-mix(in srgb, var(--ring1) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring1) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
         &.ring2 {
-            background: color-mix(in srgb, var(--ring2) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring2) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
         &.ring3 {
-            background: color-mix(in srgb, var(--ring3) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring3) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
         &.ring4 {
-            background: color-mix(in srgb, var(--ring4) var(--ringOpacity), var(--boardLight) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring4) var(--ring_opacity), var(--board_light) calc(100% - var(--ring_opacity)));
         }
     }
 
     .innersq.even {
         &.ring1 {
-            background: color-mix(in srgb, var(--ring1) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring1) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
         &.ring2 {
-            background: color-mix(in srgb, var(--ring2) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring2) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
         &.ring3 {
-            background: color-mix(in srgb, var(--ring3) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring3) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
         &.ring4 {
-            background: color-mix(in srgb, var(--ring4) var(--ringOpacity), var(--boardDark) calc(100% - var(--ringOpacity)));
+            background: color-mix(in srgb, var(--ring4) var(--ring_opacity), var(--board_dark) calc(100% - var(--ring_opacity)));
         }
     }
 
 
     .colLabel {
         padding: 1px 2px;
-        /* font-size: 120%; */
         font-size: min(1.5vh, 2vw);
 
         grid-area: 3/3/3/3;
-        color: var(--textLight);        
+        color: var(--text_light);        
     }
     .rowLabel {
         padding: 1px 2px;
         font-size: min(1.5vh, 2vw);
         grid-area: 1/1/1/1;
-        color: var(--textLight)
+        color: var(--text_light)
     }
 
     .flat {
@@ -336,19 +333,13 @@
     }
 
     .white {
-        background: var(--player1noble);
-        border-color: var(--player1border);
-        &.flat {
-            background: var(--player1flat);
-        }
+        background: var(--white);
+        border-color: var(--white_border);
     }
 
     .black {
-        background: var(--player2noble);
-        border-color: var(--player2border);
-        &.flat {
-            background: var(--player2flat);
-        }
+        background: var(--black);
+        border-color: var(--black_border);
     }
 
 

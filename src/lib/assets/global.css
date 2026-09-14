@@ -1,5 +1,5 @@
 * {
-    color: var(--textLight);
+    color: var(--text_light);
     font-family:Ubuntu; 
     font-weight: 400;
     scrollbar-width: none;
@@ -128,7 +128,7 @@ textarea {
 
         font-family: "Material Symbols Outlined";
         background: var(--primary);
-        color: var(--textDark);
+        color: var(--text_dark);
     }
 }
 

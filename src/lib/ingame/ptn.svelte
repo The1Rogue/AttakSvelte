@@ -127,7 +127,7 @@
     }
 
     p {
-        color: var(--textLight);
+        color: var(--text_light);
         margin: auto 5px;
         line-height: 1;
     }
@@ -144,28 +144,28 @@
     }
 
     .white {
-        border-color: var(--player1);
+        border-color: var(--white_border);
 
         &.past {
-            background: var(--player1);
-            color: var(--player2);
+            background: var(--white);
+            color: var(--black);
         }
         &.future {
             background: 0;
-            color: var(--textLight);
+            color: var(--text_light);
         }
     }
 
     .black {
-        border-color: var(--player2);
+        border-color: var(--black_border);
 
         &.past {
-            background: var(--player2);
-            color: var(--player1);
+            background: var(--black);
+            color: var(--white);
         }
         &.future {
             background: 0;
-            color: var(--textLight);
+            color: var(--text_light);
         }
     }
 

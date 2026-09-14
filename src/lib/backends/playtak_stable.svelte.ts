@@ -29,6 +29,7 @@ export type GameData = {
 
 export const GameStateStrings = ["0-0", "1/2-1/2", "F-0", "0-F", "R-0", "0-R", "1-0", "0-1"]
 
+
 enum Color {
     Neither = 0,
     White = 1,
@@ -51,6 +52,8 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         if (this.ws != undefined && this.ws.readyState != WebSocket.CLOSED) { return false }
     
         this.ws = new WebSocket("wss://playtak.com/ws", "binary");
+
+        window.onbeforeunload = () => {console.log("closing connection"); this.ws?.close()}
     
         this.ws.onmessage = ({data}) => {
             this.messageChain = this.messageChain.then(() => data.text()).then((s) => this.handle_msg(s))

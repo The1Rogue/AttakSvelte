@@ -66,7 +66,7 @@
     padding: 3px;
     transition: padding var(--animSpeed);
     p {
-        color: var(--textDark);
+        color: var(--text_dark);
         font-size: 2em;
         margin: calc(16px - .5em) 2px;
     }
@@ -76,7 +76,7 @@
     padding-right: 10px;
     background: var(--accent);
     p {
-        color: var(--textLight);
+        color: var(--text_light);
     }
 }
 

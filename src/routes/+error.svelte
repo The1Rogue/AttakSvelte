@@ -5,7 +5,7 @@
 
 * {
     text-align: center;
-    color: var(--textLight);
+    color: var(--text_light);
 }
 
 </style>

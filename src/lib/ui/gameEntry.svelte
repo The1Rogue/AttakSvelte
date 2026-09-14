@@ -101,7 +101,7 @@
     }
 
     p {
-        color: var(--textLight);
+        color: var(--text_light);
         padding: .075rem .25rem;
         margin: 0;
     }

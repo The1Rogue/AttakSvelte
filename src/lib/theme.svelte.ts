@@ -1,3 +1,4 @@
+import { json } from "@sveltejs/kit"
 
 
 enum BoardStyle {
@@ -10,135 +11,265 @@ enum BoardStyle {
     GridL = 3
 }
 
+type Color = [number, number, number, number]
+export function colorString(color: Color) {
+    return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]/255})`
+}
+
+
 type Theme = {
-    id: string,
-    boardStyle: BoardStyle,
-    boardChecker: boolean,
-    // fromCenter: boolean,
-    rings: number,
-    ringOpacity: number,
-    stoneborder: number,
-    // vars?
-    colors: {
-        primary: string,
-        secondary: string,
-        ui: string,
-        accent: string,
-        panel: string
+    name: String,
 
-        board1: string,
-        board2: string,
-        board3: string,
+    ui: {
+        primary: Color,
+        secondary: Color,
+        ui: Color,
+        accent: Color,
+        panel: Color,
+        text_light: Color,
+        text_dark: Color,
+    }
 
-        player1: string,
-        player1road: string,
-        player1flat: string,
-        player1special: string,
-        player1border: string,
+    pieces: {
+        border_width: number,
+        white: Color,
+        white_border: Color,
+        black: Color,
+        black_border: Color,
+        shadow: Color,
+    }
 
-        player2: string,
-        player2road: string,
-        player2flat: string,
-        player2special: string,
-        player2border: string,
+    board: {
+        style: BoardStyle,
+        checker: boolean,
+        light: Color,
+        dark: Color,
+        reserves: Color,
 
-        ring1: string,
-        ring2: string,
-        ring3: string,
-        ring4: string,
-
-        textLight: string,
-        textDark: string,
-        umbra: string,
+        rings: number,
+        ring1: Color,
+        ring2: Color,
+        ring3: Color,
+        ring4: Color,
+        ring_opacity: number
     }
 }
+
+type Settings = {
+    animation_speed: number //ms
+    fast_moves: boolean
+}
+
 
 const defaultTheme: Theme = {
-    id: "Attak",
-    boardStyle: BoardStyle.GridS,
-    boardChecker: false,
-    rings: 0,
-    ringOpacity: 0,
-    stoneborder: 2,
+    name: "Attak",
+    ui: {
+        primary: [0x49,0x88,0xb3,0xFF],
+        secondary: [0x16,0x17,0x1a,0xFF],
+        ui: [0x29,0x2b,0x2f,0xFF],
+        accent: [0x20,0x22,0x25,0xFF],
+        panel: [0x40,0x44,0x4b,0xcc],
+        text_light: [0xfa,0xfa,0xfa,0xFF],
+        text_dark: [0x21,0x21,0x21,0xFF],
+    },
 
-    colors: {
-        primary: "#4988b3",
-        secondary: "#16171a",
-        ui: "#292b2f",
-        accent: "#202225",
-        panel: "#40444bcc",
-        
-        board1: "#806e66",
-        board2: "#5e5148",
-        board3: "#685953",
+    pieces: {
+        border_width: 2,
+        white: [0xd6,0xd6,0xd6,0xFF],
+        white_border: [0x36,0x34,0x34,0xFF],
+        black: [0x40,0x40,0x40,0xFF],
+        black_border: [0x00,0x00,0x00,0xFF],
+        shadow: [0x00,0x00,0x00,0x33]
+    },
 
-        player1: "#d6d6d6",
-        player1road: "#d6d6d6",
-        player1flat: "#cbcbcb",
-        player1special: "#c1c1c1",
-        player1border: "#363434",
+    board: {
+        style: BoardStyle.GridS,
+        checker: false,
+        light: [0x80,0x6e,0x66,0xFF],
+        dark: [0x5e,0x51,0x48,0xFF],
+        reserves: [0x68,0x59,0x53,0xFF],
 
-        player2: "#080808",
-        player2road: "#2d2d2d",
-        player2flat: "#404040",
-        player2special: "#333333",
-        player2border: "#000000",
-
-        ring1: "#0000",
-        ring2: "#0000",
-        ring3: "#0000",
-        ring4: "#0000",
-        
-        textLight: "#fafafac0",
-        textDark: "#212121cd",
-        umbra: "#00000033"
+        rings: 0,
+        ring1: [0x0,0x0,0x0,0x0],
+        ring2: [0x0,0x0,0x0,0x0],
+        ring3: [0x0,0x0,0x0,0x0],
+        ring4: [0x0,0x0,0x0,0x0],
+        ring_opacity: 0,
     }
 }
 
-const attak = '{"id":"attak","boardStyle":"grid1","boardChecker":false,"rings":0,"vars":{"piece-border-width":2,"rings-opacity":0.25},"colors":{"primary":"#4988b3","secondary":"#16171a","ui":"#292b2f","accent":"#202225","panel":"#40444bcc","board1":"#806e66","board2":"#5e5148","board3":"#685953","player1":"#d6d6d6","player1road":"#d6d6d6","player1flat":"#cbcbcb","player1special":"#c1c1c1","player1border":"#363434","player2":"#080808","player2road":"#2d2d2d","player2flat":"#404040","player2special":"#333333","player2border":"#000000","ring1":"#ffffff38","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff","textLight":"#fafafac0","textDark":"#212121cd","umbra":"#00000033"},"fromCenter":false,"name":"Attak","board3Dark":true}'
-const attakClassic = '{"id":"attak-classic","boardStyle":"grid2","boardChecker":false,"rings":0,"vars":{"piece-border-width":1,"rings-opacity":0.25},"colors":{"primary":"#44b383","secondary":"#222a61","ui":"#2a2a2a","accent":"#394d9e","panel":"#0000007F","board1":"#3f50a6","board2":"#949494","board3":"#222a61","player1":"#d4d4d4","player1road":"#d4d4d4","player1flat":"#d4d4d4","player1special":"#d4d4d4","player1border":"#999999","player2":"#2a2a2a","player2road":"#2a2a2a","player2flat":"#555555","player2special":"#555555","player2border":"#2a2a2a","ring1":"#ffffff38","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff","textLight":"#fafafac0","textDark":"#212121cd","umbra":"#0000007F"},"fromCenter":false,"name":"AttakClassic","board3Dark":true}'
+const themeNinja: Theme = {
+    name: "PTN Ninja",
+    ui: {
+        primary: [0x8B,0xC3,0x4A,0xFF],
+        secondary: [0x60,0x7D,0x8B,0xFF],
+        ui: [0x26,0x32,0x38,0xFF],
+        accent: [0x20,0x2A,0x2F,0xFF],
+        panel: [0x78,0x90,0x9C,0xC0],
+        text_light: [0xfa,0xfa,0xfa,0xCD],
+        text_dark: [0x21,0x21,0x21,0xCD],
+    },
 
-const ptnNinja = '{"id":"PtnNinja","boardStyle":"blank","boardChecker":true,"vars":{"piece-border-width":1,"rings-opacity":0.25},"colors":{"primary":"#8bc34a","secondary":"#607d8b","ui":"#263238","accent":"#202a2f","panel":"#78909cc0","board1":"#90a4ae","board2":"#8a9faa","board3":"#78909c","player1":"#cfd8dc","player1road":"#cfd8dc","player1flat":"#cfd8dc","player1special":"#eceff1","player1border":"#546e7a","player2":"#263238","player2road":"#455a64","player2flat":"#546e7a","player2special":"#455a64","player2border":"#263238","textLight":"#fafafacd","textDark":"#212121cd","umbra":"#00000033","ring1":"#ffffff44","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff"},"isBuiltIn":true,"fromCenter":false,"rings":0,"name":"PtnNinja","board3Dark":true}'
-const discord = '{"id":"Discord","boardStyle":"grid1","boardChecker":false,"rings":0,"vars":{"piece-border-width":2,"rings-opacity":0.25},"colors":{"primary":"#d1a362","secondary":"#313338","ui":"#292b2f","accent":"#202225","panel":"#40444bcc","board1":"#65676b","board2":"#5b5e63","board3":"#54575c","player1":"#d6d6d6","player1road":"#d6d6d6","player1flat":"#cbcbcb","player1special":"#c1c1c1","player1border":"#363434","player2":"#080808","player2road":"#2d2d2d","player2flat":"#404040","player2special":"#333333","player2border":"#000000","ring1":"#ffffff38","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff","textLight":"#fafafac0","textDark":"#212121cd","umbra":"#00000033"},"isBuiltIn":true,"fromCenter":false,"name":"Discord","board3Dark":true}'
+    pieces: {
+        border_width: 1,
+        white: [0xCF,0xD8,0xDC,0xFF],
+        white_border: [0x54,0x6E,0x7A,0xFF],
+        black: [0x54,0x6E,0x7A,0xFF],
+        black_border: [0x26,0x32,0x38,0xFF],
+        shadow: [0x00,0x00,0x00,0x33]
+    },
 
-const walnut_bak = '{"id":"walnut","boardStyle":"blank","boardChecker":true,"vars":{"piece-border-width":2,"rings-opacity":1},"colors":{"primary":"#79a65d","secondary":"#332525","ui":"#5e3a20","accent":"#452915","panel":"#876b55cc","board1":"#734e32","board2":"#66452c","board3":"#734e3257","player1":"#ffffff","player1road":"#ffffff","player1flat":"#ffffff","player1special":"#ffffff","player1border":"#3b3b3b","player2":"#121212","player2road":"#1a1a1a","player2flat":"#3d3d3d","player2special":"#3d3d3d","player2border":"#141414","textLight":"#ffffffcc","textDark":"#171717cc","umbra":"#00000033","bg":"#332525ff","panelOpaque":"#876b55ff","panelOpaqueHover":"#9d8674ff","panelClear":"#876b5500","panelClearHover":"#9d867400","player1clear":"#ffffff00","player2clear":"#12121200","ring1":"#70564c47","ring2":"#694c3687","ring3":"#785f4c57","ring4":"#ffffffff"},"primaryDark":true,"secondaryDark":true,"board1Dark":true,"board2Dark":true,"isDark":true,"accentDark":true,"panelDark":true,"player1Dark":false,"player2Dark":true,"fromCenter":false,"rings":0,"name":"Walnut"}'
-const walnut = '{"id":"walnut","boardStyle":"blank","boardChecker":true,"vars":{"piece-border-width":2,"rings-opacity":1},"colors":{"primary":"#79a65d","secondary":"#332525","ui":"#5e3a20","accent":"#452915","panel":"#876b557c","board1":"#734e32","board2":"#66452c","board3":"#734e3257","player1":"#ffffff","player1road":"#ffffff","player1flat":"#ffffff","player1special":"#ffffff","player1border":"#3b3b3b","player2":"#121212","player2road":"#1a1a1a","player2flat":"#3d3d3d","player2special":"#3d3d3d","player2border":"#141414","textLight":"#ffffffcc","textDark":"#171717cc","umbra":"#00000033","bg":"#332525ff","panelOpaque":"#876b55ff","panelOpaqueHover":"#9d8674ff","panelClear":"#876b5500","panelClearHover":"#9d867400","player1clear":"#ffffff00","player2clear":"#12121200","ring1":"#70564c47","ring2":"#694c3687","ring3":"#785f4c57","ring4":"#ffffffff"},"primaryDark":true,"secondaryDark":true,"board1Dark":true,"board2Dark":true,"isDark":true,"accentDark":true,"panelDark":true,"player1Dark":false,"player2Dark":true,"fromCenter":false,"rings":0,"name":"Walnut"}'
-const playtak = '{"id":"playtak","boardStyle":"grid2","boardChecker":false,"rings":0,"vars":{"piece-border-width":2,"rings-opacity":0.25},"colors":{"primary":"#35455e","secondary":"#453A3A","ui":"#191f25","accent":"#2f2e2e","panel":"#191f257f","board1":"#ebd3a4","board2":"#c39364","board3":"#332117","player1":"#ebe9d8","player1road":"#c1c0b1","player1flat":"#ebe9d8","player1special":"#ebe9d8","player1border":"#555754","player2":"#050708","player2road":"#081016","player2flat":"#050708","player2special":"#050708","player2border":"#747370","ring1":"#ffffff38","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff","textLight":"#cccccc","textDark":"#000000","umbra":"#00000033"},"fromCenter":false,"name":"Playtak","board3Dark":true}'
-export const builtInThemes = [["Attak", attak], ["Attak Classic", attakClassic], ["ptnNinja", ptnNinja], ["Discord", discord], ["PlayTak", playtak], ["Walnut", walnut]]
+    board: {
+        style: BoardStyle.Blank,
+        checker: true,
+        light: [0x90,0xA4,0xAE,0xFF],
+        dark: [0x8A,0x9F,0xAA,0xFF],
+        reserves: [0x78,0x90,0x9C,0xFF],
 
-
-const boardTypeStrings: Array<string> = ["diamonds3","diamonds2","diamonds1","blank","grid1","grid2","grid3"]
-export function applyThemeString(input: string) {
-    let obj
-    try {
-        obj = JSON.parse(input)
-    } catch {
-        return
+        rings: 0,
+        ring1: [0x0,0x0,0x0,0x0],
+        ring2: [0x0,0x0,0x0,0x0],
+        ring3: [0x0,0x0,0x0,0x0],
+        ring4: [0x0,0x0,0x0,0x0],
+        ring_opacity: 0,
     }
+}
 
-    currentTheme.id = obj.name ?? currentTheme.id
-    currentTheme.boardStyle = boardTypeStrings.indexOf(obj.boardStyle ?? "blank") - 3
-    currentTheme.boardChecker = obj.boardChecker ?? "true"
-    currentTheme.rings = obj.rings ?? 0
-    if (obj.vars) {
-        currentTheme.ringOpacity = (obj.vars["rings-opacity"] ?? 0) * 100;
-        currentTheme.stoneborder = obj.vars["piece-border-width"] ?? 1
+const themeDiscord: Theme = {
+    name: "Discord",
+    ui: {
+        primary: [0xD1,0xA3, 0x62, 0xFF],
+        secondary: [0x31, 0x33, 0x38, 0xFF],
+        ui: [0x29, 0x2B, 0x2F, 0xFF],
+        accent: [0x20, 0x22, 0x25, 0xFF],
+        panel: [0x40, 0x44, 0x4b, 0xCC],
+        text_light: [0xFA,0xFA,0xFA,0xCD],
+        text_dark: [0x21,0x21,0x21,0xCD],
+
+    },
+    pieces: {
+        border_width: 2,
+        white: [0xCB,0xCB,0xCB,0xFF],
+        white_border: [0x36,0x34,0x34,0xFF],
+        black: [0x40,0x40,0x40,0xFF],
+        black_border: [0x00,0x00,0x00,0xFF],
+        shadow: [0x00,0x00,0x00,0x33]
+    },
+    board: {
+        style: BoardStyle.GridS,
+        checker: false,
+        light: [0x65,0x67,0x6B,0xFF],
+        dark: [0x5B,0x5E,0x63,0xFF],
+        reserves: [0x54,0x57,0x5C,0xFF],
+
+        rings: 0,
+        ring1: [0x0,0x0,0x0,0x0],
+        ring2: [0x0,0x0,0x0,0x0],
+        ring3: [0x0,0x0,0x0,0x0],
+        ring4: [0x0,0x0,0x0,0x0],
+        ring_opacity: 0,
     }
-    if (obj.colors) {
-        for (let [name, color] of Object.entries(currentTheme.colors)) {
-            currentTheme.colors[name as keyof typeof currentTheme.colors] = obj.colors[name] ?? color
-        }
+}
+
+const themePlayTak: Theme = {
+    name: "PlayTak",
+    ui: {
+        primary: [0x35,0x45,0x5e,0xFF],
+        secondary: [0x45,0x3A,0x3A,0xFF],
+        ui: [0x19,0x1F,0x25,0xFF],
+        accent: [0x2F,0x2E,0x2E,0xFF],
+        panel: [0x19,0x1F,0x25,0x7F],
+        text_light: [0xCC,0xCC,0xCC,0xFF],
+        text_dark: [0x00,0x00,0x00,0xFF],
+
+    },
+    pieces: {
+        border_width: 2,
+        white: [0xEB,0xE9,0xD8,0xFF],
+        white_border: [0x55,0x57,0x54,0xFF],
+        black: [0x05,0x07,0x08,0xFF],
+        black_border: [0x74,0x73,0x70,0xFF],
+        shadow: [0x00,0x00,0x00,0x33]
+    },
+    board: {
+        style: BoardStyle.GridM,
+        checker: false,
+        light: [0xEB,0xD3,0xA4,0xFF],
+        dark: [0xC3,0x93,0x64,0xFF],
+        reserves: [0x33,0x21,0x17,0xFF],
+
+        rings: 0,
+        ring1: [0x0,0x0,0x0,0x0],
+        ring2: [0x0,0x0,0x0,0x0],
+        ring3: [0x0,0x0,0x0,0x0],
+        ring4: [0x0,0x0,0x0,0x0],
+        ring_opacity: 0,
+    }
+}
+
+const themeWalnut: Theme = {
+    name: "Walnut",
+    ui: {
+        primary: [0x79,0xA6,0x5D,0xFF],
+        secondary: [0x33,0x25,0x25,0xFF],
+        ui: [0x5E,0x3A,0x20,0xFF],
+        accent: [0x45,0x29,0x15,0xFF],
+        panel: [0x87,0x6B,0x55,0x7C],
+        text_light: [0xFF,0xFF,0xFF,0xCC],
+        text_dark: [0x17,0x17,0x17,0xCC],
+
+    },
+    pieces: {
+        border_width: 2,
+        white: [0xFF,0xFF,0xFF,0xFF],
+        white_border: [0x3B,0x3B,0x3B,0xFF],
+        black: [0x3D,0x3D,0x3D,0xFF],
+        black_border: [0x14,0x14,0x14,0xFF],
+        shadow: [0x00,0x00,0x00,0x33]
+    },
+    board: {
+        style: BoardStyle.Blank,
+        checker: true,
+        light: [0x73,0x4E,0x32,0xFF],
+        dark: [0x66,0x45,0x2C,0xFF],
+        reserves: [0x48,0x33,0x29,0xFF],
+
+        rings: 0,
+        ring1: [0x0,0x0,0x0,0x0],
+        ring2: [0x0,0x0,0x0,0x0],
+        ring3: [0x0,0x0,0x0,0x0],
+        ring4: [0x0,0x0,0x0,0x0],
+        ring_opacity: 0,
     }
 }
 
 
+const defaultSettings: Settings = {
+    animation_speed: 150,
+    fast_moves: false,
+}
 
-// export function reloadTheme() {
-//     console.log("reloaded")
-//     currentTheme = parseThemeString(localStorage.getItem("theme") ?? '')
-// }
 
-export let currentTheme: Theme = $state(defaultTheme)
-applyThemeString(localStorage.getItem("theme") ?? "")
 
-export let animationSpeed: {speed: number} = $state({speed: 150})
+// const attakClassic = '{"id":"attak-classic","boardStyle":"grid2","boardChecker":false,"rings":0,"vars":{"piece-border-width":1,"rings-opacity":0.25},"colors":{"primary":"#44b383","secondary":"#222a61","ui":"#2a2a2a","accent":"#394d9e","panel":"#0000007F","board1":"#3f50a6","board2":"#949494","board3":"#222a61","player1":"#d4d4d4","player1road":"#d4d4d4","player1flat":"#d4d4d4","player1special":"#d4d4d4","player1border":"#999999","player2":"#2a2a2a","player2road":"#2a2a2a","player2flat":"#555555","player2special":"#555555","player2border":"#2a2a2a","ring1":"#ffffff38","ring2":"#ffffff88","ring3":"#ffffffcc","ring4":"#ffffffff","textLight":"#fafafac0","textDark":"#212121cd","umbra":"#0000007F"},"fromCenter":false,"name":"AttakClassic","board3Dark":true}'
+// const walnut_bak = '{"id":"walnut","boardStyle":"blank","boardChecker":true,"vars":{"piece-border-width":2,"rings-opacity":1},"colors":{"primary":"#79a65d","secondary":"#332525","ui":"#5e3a20","accent":"#452915","panel":"#876b55cc","board1":"#734e32","board2":"#66452c","board3":"#734e3257","player1":"#ffffff","player1road":"#ffffff","player1flat":"#ffffff","player1special":"#ffffff","player1border":"#3b3b3b","player2":"#121212","player2road":"#1a1a1a","player2flat":"#3d3d3d","player2special":"#3d3d3d","player2border":"#141414","textLight":"#ffffffcc","textDark":"#171717cc","umbra":"#00000033","bg":"#332525ff","panelOpaque":"#876b55ff","panelOpaqueHover":"#9d8674ff","panelClear":"#876b5500","panelClearHover":"#9d867400","player1clear":"#ffffff00","player2clear":"#12121200","ring1":"#70564c47","ring2":"#694c3687","ring3":"#785f4c57","ring4":"#ffffffff"},"primaryDark":true,"secondaryDark":true,"board1Dark":true,"board2Dark":true,"isDark":true,"accentDark":true,"panelDark":true,"player1Dark":false,"player2Dark":true,"fromCenter":false,"rings":0,"name":"Walnut"}'
+export const builtInThemes: Array<Theme> = [defaultTheme, themeNinja, themeDiscord, themePlayTak, themeWalnut]
+
+export let theme: Theme = $state(defaultTheme)
+export let settings: Settings = $state(defaultSettings)
+
+
+let t = localStorage.getItem("theme")
+if (t != null) {
+    Object.assign(theme, JSON.parse(t))
+} else {
+    localStorage.setItem("theme", JSON.stringify(theme))
+}
+
+t = localStorage.getItem("settings")
+if (t != null) {
+    Object.assign(settings, JSON.parse(t))
+} else {
+    localStorage.setItem("settings", JSON.stringify(defaultSettings))
+}
+

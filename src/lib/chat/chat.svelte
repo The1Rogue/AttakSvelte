@@ -70,13 +70,13 @@
     display: flex;
     padding: .3em 1em;
     list-style: none;
-    color: var(--textLight);
+    color: var(--text_light);
     background: var(--accent);
     border-radius: 5px;
 }
 
 .room[open] > summary {
-    color: var(--textDark);
+    color: var(--text_dark);
     background: var(--primary);
     border-radius: 5px 5px 0 0;
 }
@@ -84,7 +84,7 @@
 .room + div {
     flex-grow: 1;
     height: 0;
-    color: var(--textLight);
+    color: var(--text_light);
     overflow-y: scroll;
     transition: max-height .4s ease-in-out;
     display: flex;
