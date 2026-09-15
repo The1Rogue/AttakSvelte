@@ -11,26 +11,28 @@
     const ptnRegex = /(?:[SFC]?[a-g][1-8](?![<+\->])|[1-8]?[a-g][1-8][<+\->][1-8]*\*?)/g
     const commentRegex = /{[^{]*}|[0-9]+\./g //also includes move numbering
 
-    //poor mans enum (enums arent allowed inside script tags for some reason, they work in ts files tho)
-    const Rated = 0
-    const Unrated = 1
-    const Tournament = 2
+    let settings: GameData = $state({
+        id: 0,
+        p1: "",
+        p2: "",
+        color: 3,
+        size: 6,
+        time: 10,
+        inc: 15,
+        scaling_inc: false,
+        halfkomi: 4,
+        opening: 1,
+        flats: 30,
+        caps: 1,
+        rated: true,
+        tourney: false,
+        trigger: 0,
+        extra: 0,
+    })
 
 
-    let opponent = $state("")
-
-    let color = $state("A")
-    let size = $state(6)
-    let gametype = $state(Rated)
+    let gametype = $state(0)
     let komi = $state(2)
-
-    let time = $state(10)
-    let incr = $state(15)
-    let extra = $state(0)
-    let trigger = $state(0)
-
-    let flats = $state(30) 
-    let caps = $state(1) 
 
     let ptn = $state("")
 
@@ -38,35 +40,17 @@
 
     $effect(
         () => {
-            flats = defaultflats[size - 3]
-            caps = (size - 3) >> 1
+            settings.flats = defaultflats[settings.size - 3]
+            settings.caps = (settings.size - 3) >> 1
         }
     )
 
 
     function createSeek() {
-        
-        let game: GameData = {
-            id: 0,
-            p1: "",
-            p2: opponent,
-            color: 3,
-            size: size,
-            time: time,
-            inc: incr,
-            scaling_inc: false,
-            halfkomi: komi * 2,
-            opening: 1,
-            flats: flats,
-            caps: caps,
-            rated: gametype != 0,
-            tourney: gametype == 2,
-            trigger: trigger,
-            extra: extra,
-        }
-        search(game)
-
-        // send(`Seek ${size} ${time} ${incr} ${color} ${komi * 2} ${flats} ${caps} ${gametype & 1} ${gametype >> 1} ${trigger} ${extra} ${opponent}`)
+        settings.halfkomi = komi * 2
+        settings.rated = gametype != 0
+        settings.tourney = gametype == 2
+        search(settings)
         goto("/")
     }
 
@@ -76,7 +60,7 @@
                 id: 0,
                 p1: "White",
                 p2: "Black",
-                size: size,
+                size: settings.size,
                 time: 0,
                 inc: 0,
                 scaling_inc: false,
@@ -85,8 +69,8 @@
                 color: 3,
                 halfkomi: komi * 2,
                 opening: 1,
-                flats: flats,
-                caps: caps,
+                flats: settings.flats,
+                caps: settings.caps,
                 rated: false,
                 tourney: false
             }, undefined))
@@ -152,7 +136,7 @@
             
             let startPos
             if (tps != undefined) {
-                [startPos, gameData.size] = TPSPosition.fromTPS(tps, flats, caps)
+                [startPos, gameData.size] = TPSPosition.fromTPS(tps, settings.flats, settings.caps)
                 if (startPos == undefined) {
                     addToast("Invalid TPS", true)
                     return
@@ -164,10 +148,10 @@
                 return
             }
             if (gameData.flats < 0) {
-                gameData.flats = defaultflats[size-3]
+                gameData.flats = defaultflats[gameData.size-3]
             }
             if (gameData.caps < 0) {
-                gameData.caps = (size - 3) >> 1
+                gameData.caps = (gameData.size - 3) >> 1
             }
 
             ptn2 = ptn2.replaceAll(commentRegex, "")
@@ -195,16 +179,16 @@
             Lobby Game
         </summary>
         <div class="ui_panel">
-            <label>Opponent: <br/><input bind:value={opponent} type=text title="opponent who may accept to seek, leave blank to allow anyone to accept"/></label>
-            <label>Your Color: <br/><select class="rounded_button" bind:value={color}>
-                <option value="A">Random</option>
-                <option value="W">White</option>
-                <option value="B">Black</option>
+            <label>Opponent: <br/><input bind:value={settings.p2} type=text title="opponent who may accept to seek, leave blank to allow anyone to accept"/></label>
+            <label>Your Color: <br/><select class="rounded_button" bind:value={settings.color}>
+                <option value={3}>Random</option>
+                <option value={1}>White</option>
+                <option value={2}>Black</option>
             </select></label>
 
             <!-- presets -->
 
-            <label>Board Size:<br/><select class="rounded_button" bind:value={size}>
+            <label>Board Size:<br/><select class="rounded_button" bind:value={settings.size}>
                 <option value={3}>3x3</option>
                 <option value={4}>4x4</option>
                 <option value={5}>5x5</option>
@@ -214,18 +198,28 @@
             </select></label>
             <br/>
             <label>Game Type: <br/><select class="rounded_button" bind:value={gametype} title="whether the game is rated or not, tournament is the same as rated, just used by automated systems to recognize tournament games">
-                <option value="Rated">Rated</option>
-                <option value="Unrated">Unrated</option>
-                <option value="Tournament">Tournament</option>
+                <option value={0}>Rated</option>
+                <option value={1}>Unrated</option>
+                <option value={2}>Tournament</option>
             </select></label>
+
             <label>Komi: <br/><input type=number min=0 max=4 step=.5 bind:value={komi} title="a flat score added for black when the game ends on flats"/></label>
-            <label>Time: (minutes)<br/><input type=number min=1 max=180 bind:value={time}/></label>
-            <label>Increment: (seconds)<br/><input type=number min=0 max=180 bind:value={incr}/></label>
-            <label>Extra Time: (minutes)<br/><input type=number min=0 max=60 bind:value={extra} title="extra time added once at the trigger move"/></label>
-            <label>Trigger: <br/><input type=number min=0 max=60 step=5 bind:value={trigger} title="when extra time is given"/></label>
-            <label>Flats: <br/><input type=number min=10 max=80 bind:value={flats}/></label>
-            <label>Capstones: <br/><input type=number min=0 max=5 bind:value={caps}/></label>
+
+
+            <label>Time: (minutes)<br/><input type=number min=1 max=180 bind:value={settings.time}/></label>
+            <label>Increment: (seconds)<br/><input type=number min=0 max=180 bind:value={settings.inc}/></label>
+            <label>Extra Time: (minutes)<br/><input type=number min=0 max=60 bind:value={settings.extra} title="extra time added once at the trigger move"/></label>
+            <label>Trigger: <br/><input type=number min=0 max=60 step=5 bind:value={settings.trigger} title="when extra time is given"/></label>
+            <label>Flats: <br/><input type=number min=10 max=80 bind:value={settings.flats}/></label>
+            <label>Capstones: <br/><input type=number min=0 max=5 bind:value={settings.caps}/></label>
           
+            <label>Opening: <br/><select class="rounded_button" bind:value={settings.opening}>
+                <!-- <option value={0}>no-swap</option> -->
+                 <option value={1}>swap</option>
+                 <option value={2}>double black stack</option>
+            </select></label>
+            
+            <label>Scaling Increment: <br/><input type=checkbox bind:checked={settings.scaling_inc} title="scale the increment by the current move"/></label>
 
             <button class="rounded_button" onclick={() => createSeek()}>Create Seek</button>
         </div>
@@ -237,7 +231,7 @@
             Analysis Board
         </summary>
         <div>            
-            <label>Board Size:<br/><select class="rounded_button" bind:value={size}>
+            <label>Board Size:<br/><select class="rounded_button" bind:value={settings.size}>
                 <option value={3}>3x3</option>
                 <option value={4}>4x4</option>
                 <option value={5}>5x5</option>
@@ -246,8 +240,8 @@
                 <option value={8}>8x8</option>
             </select></label>
             <label>Komi: <br/><input type=number min=0 max=4 step=.5 bind:value={komi} title="a flat score added for black when the game ends on flats"/></label>
-            <label>Flats: <br/><input type=number min=10 max=80 bind:value={flats}/></label>
-            <label>Capstones: <br/><input type=number min=0 max=5 bind:value={caps}/></label>
+            <label>Flats: <br/><input type=number min=10 max=80 bind:value={settings.flats}/></label>
+            <label>Capstones: <br/><input type=number min=0 max=5 bind:value={settings.caps}/></label>
 
             <label for=ptn >PTN/TPS:</label><textarea id=ptn rows=10 bind:value={ptn}></textarea>
             <button class="rounded_button" onclick={() => createScratch()}>Create Game</button>
@@ -335,7 +329,7 @@ details div {
 label {
     margin: .5em;
     * {
-        padding: .2em;
+        padding: .2em !important;
         width: calc(100% - 1em);
     }
 }
