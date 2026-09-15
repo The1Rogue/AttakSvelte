@@ -4,36 +4,14 @@
 
     import Seek from "$lib/ui/seek.svelte"
 
-    import { Game } from "$lib/ingame/game.svelte"
     import { goto } from '$app/navigation';
 
     const times = [[20,15], [15,10], [10,20], [5,5], [3,5], [1,5]]
-
-    let scratchSize = $state(6);
 
     let size = $state(6)
     let time = $state(1)
     let gametype = $state(1)
     let opponent = $state("")
-
-    function createScratch() {
-        addGame(new Game({
-            id: 0,
-            p1: "White",
-            p2: "Black",
-            color: 3,
-            size: scratchSize,
-            time: 0,
-            inc: 0,
-            halfkomi: 0,
-            flats: [10, 15, 21, 30, 40, 50][scratchSize - 3],
-            caps: (scratchSize - 3) >> 1,
-            rated: false,
-            tourney: false,
-            trigger: 0,
-            extra: 0,
-        }))
-    }
 
     function createSeek() {
         let flats = [10, 15, 21, 30, 40, 50][size-3]
@@ -47,7 +25,9 @@
             size: size,
             time: times[time][0] * 60,
             inc: times[time][1],
+            scaling_inc: false,
             halfkomi: 4,
+            opening: 1,
             flats: flats,
             caps: caps,
             rated: gametype != 0,
@@ -56,8 +36,6 @@
             extra: 0,
         }
         search(game)
-
-        // send(`Seek ${size} ${times[time][0] * 60} ${times[time][1]} A 4 ${flats} ${caps} ${gametype == 0 ? 1 : 0} ${gametype == 2 ? 1 : 0} 0 0 ${opponent}`)
     }
 </script>
 
@@ -119,7 +97,7 @@
                 <button class="seek go_button" style:--columns=2 onclick={() => spectate(parseInt(i))}> 
                     <p>{seek.p1} - {seek.p2}</p>
                     <p>{seek.size}s +{seek.halfkomi/2} komi</p>
-                    <p>{seek.time / 60}'+{seek.inc}"
+                    <p>{seek.time / 60}'+{seek.scaling_inc ? (seek.inc != 1 ? seek.inc + "n" : "n") : seek.inc}
                     {#if seek.extra > 0}
                         + {seek.extra/60}@{seek.trigger}
                     {/if}

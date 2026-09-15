@@ -34,16 +34,18 @@
 
     function load() {
         let g = new Game({
-            id: -game.id, //TODO neg is just to make it realize its not a live game, should implement that seperately
+            id: game.id,
             p1: game.player_white,
             p2: game.player_black,
             size: game.size,
             time: game.timertime,
             inc: game.timerinc,
+            scaling_inc: game.increment_scales,
             extra: game.extra_time_amount,
             trigger: game.extra_time_trigger,
             color: 3,
             halfkomi: game.komi,
+            opening: game.opening == "double black stack" ? 2 : 1,
             flats: game.pieces,
             caps: game.capstones,
             rated: game.unrated == 0,

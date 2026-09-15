@@ -90,7 +90,7 @@
                         piece.selected ? "selected" : "",
                         (i&1) == 0 ? 'white' : 'black',
                         ["flat", "wall", "cap"][piece.type],
-                        (game.highlight.indexOf(i) > -1) ? "highlight" : "",
+                        game.highlight.includes(i) ? "highlight" : "",
                         piece.position >= 0 ? "" : "reserve",
                         piece.position >= 0 && piece.height < (game.board[piece.position].length - game.data.size) ? "overflow" : ""
                     ]}

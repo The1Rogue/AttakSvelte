@@ -23,7 +23,7 @@
 
         {#each Object.values(games) as game}
             <div class="board">
-                <Board game = {game}/>
+                <Board game={game} bare={false}/>
             </div>
         {/each}
     </div>

@@ -5,27 +5,10 @@ import { Capacitor } from '@capacitor/core';
 import type { GameBackend, ChatBackend, OnlineBackend } from "$lib/backends/connector.svelte"
 
 import { addDirect, addMsg, addRoom } from "$lib/chat/chats.svelte"
-import { player_seeks, bot_seeks, ongoing, addGame, getGame, disconnect } from "$lib/backends/connector.svelte"
+import { player_seeks, bot_seeks, ongoing, addGame, getGame, disconnect, type GameData } from "$lib/backends/connector.svelte"
 import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
 
-
-export type GameData = {
-    id: number,
-    p1: string,
-    p2: string,
-    size: number,
-    time: number,
-    inc: number,
-    extra: number,
-    trigger: number,
-    color: Color,
-    halfkomi: number,
-    flats: number,
-    caps: number,
-    rated: boolean,
-    tourney: boolean
-}
 
 export const GameStateStrings = ["0-0", "1/2-1/2", "F-0", "0-F", "R-0", "0-R", "1-0", "0-1"]
 
@@ -133,7 +116,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
             return
 
         } else if (msg == "Login or Register") {
-            this.ws?.send("Protocol 2")
+            this.ws?.send("Protocol 4")
             this.ws?.send("Client Attak_2")
             this.ws?.send("Login " + this.username + " " + this.password)
         } else if (msg.startsWith("Welcome ")) {
@@ -142,7 +125,6 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         }
 
         else if (msg.startsWith("Seek new")) {
-            //Seek new [id] [user] [size] [time] [inc] [color] [komi] [pieces] [caps] [rated] [tourney] [name] [isBot]
             let cmd = msg.split(" ")
 
             if (cmd[15] != this.username && cmd[15] != "0") {
@@ -152,21 +134,23 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
             let seek: GameData = {
                 id: parseInt(cmd[2]),
                 p1: cmd[3],
-                p2: cmd[15],
+                p2: cmd[16],
                 size: parseInt(cmd[4]),
                 time: parseInt(cmd[5]),
                 inc: parseInt(cmd[6]),
-                trigger: parseInt(cmd[13]),
-                extra: parseInt(cmd[14]),
-                color: {"W": Color.White, "B": Color.Black, "A": Color.Both}[cmd[7]] ?? Color.Both,
-                halfkomi: parseInt(cmd[8]),
-                flats: parseInt(cmd[9]),
-                caps: parseInt(cmd[10]),
-                rated: cmd[11] == "0",
-                tourney: cmd[12] == "1"
+                scaling_inc: cmd[7] == "1",
+                trigger: parseInt(cmd[14]),
+                extra: parseInt(cmd[15]),
+                color: {"W": Color.White, "B": Color.Black, "A": Color.Both}[cmd[8]] ?? Color.Both,
+                halfkomi: parseInt(cmd[9]),
+                opening: cmd[18] == "1" ? 2 : 1,
+                flats: parseInt(cmd[10]),
+                caps: parseInt(cmd[11]),
+                rated: cmd[12] == "0",
+                tourney: cmd[13] == "1"
             }
 
-            if (cmd[16] == "1") {
+            if (cmd[17] == "1") {
                 bot_seeks[parseInt(cmd[2])] = seek
             } else {
                 player_seeks[parseInt(cmd[2])] = seek
@@ -174,7 +158,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         } else if (msg.startsWith("Seek remove")) {
             let cmd = msg.split(" ")
             
-            if (cmd[16] == "1") {
+            if (cmd[17] == "1") {
                 delete bot_seeks[parseInt(cmd[2])]
             } else {
                 delete player_seeks[parseInt(cmd[2])]
@@ -196,14 +180,16 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 size: parseInt(cmd[5]),
                 time: parseInt(cmd[6]),
                 inc: parseInt(cmd[7]),
-                trigger: parseInt(cmd[13]),
-                extra: parseInt(cmd[14]),
+                scaling_inc: cmd[8] == "1",
+                trigger: parseInt(cmd[14]),
+                extra: parseInt(cmd[15]),
                 color: Color.Neither,
-                halfkomi: parseInt(cmd[8]),
-                flats: parseInt(cmd[9]),
-                caps: parseInt(cmd[10]),
-                rated: cmd[11] == "0",
-                tourney: cmd[12] == "1"
+                halfkomi: parseInt(cmd[9]),
+                opening: cmd[16] == "1" ? 2 : 1,
+                flats: parseInt(cmd[10]),
+                caps: parseInt(cmd[11]),
+                rated: cmd[12] == "0",
+                tourney: cmd[13] == "1"
             }
             ongoing[parseInt(cmd[2])] = seek
             
@@ -222,13 +208,15 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 size: parseInt(cmd[4]),
                 time: parseInt(cmd[5]),
                 inc: parseInt(cmd[6]),
-                halfkomi: parseInt(cmd[7]),
-                flats: parseInt(cmd[8]),
-                caps: parseInt(cmd[9]),
-                rated: cmd[10] == "0",
-                tourney: cmd[11] == "1",
-                trigger: parseInt(cmd[12]),
-                extra: parseInt(cmd[13]),
+                scaling_inc: cmd[7] == "1",
+                halfkomi: parseInt(cmd[8]),
+                opening: cmd[15] == "1" ? 2 : 1,
+                flats: parseInt(cmd[9]),
+                caps: parseInt(cmd[10]),
+                rated: cmd[11] == "0",
+                tourney: cmd[12] == "1",
+                trigger: parseInt(cmd[13]),
+                extra: parseInt(cmd[14]),
             }
             addGame(new Game(gameData, undefined, this))
             let players = [cmd[2], cmd[3]]
@@ -245,13 +233,15 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 size: parseInt(cmd[7]),
                 time: parseInt(cmd[8]),
                 inc: parseInt(cmd[9]),
-                halfkomi: parseInt(cmd[10]),
-                flats: parseInt(cmd[11]),
-                caps: parseInt(cmd[12]),
-                rated: cmd[13] == "0",
-                tourney: cmd[14] == "1",
-                trigger: parseInt(cmd[15]),
-                extra: parseInt(cmd[16]),
+                scaling_inc: cmd[10] == "1",
+                halfkomi: parseInt(cmd[11]),
+                opening: cmd[19] == "1" ? 2 : 1,
+                flats: parseInt(cmd[12]),
+                caps: parseInt(cmd[13]),
+                rated: cmd[14] == "0",
+                tourney: cmd[15] == "1",
+                trigger: parseInt(cmd[16]),
+                extra: parseInt(cmd[17]),
             }
             addGame(new Game(gameData, undefined, this))
             let opp = cmd[6] == "white" ? cmd[5] : cmd[3]

@@ -53,7 +53,7 @@
             {/if}
             <button onclick={() => game.goto(i+1)} class={[
                 "ply",
-                (i + startply < 2) == (((i + startply) & 1) == 0) ? "black" : "white",
+                (i + startply < 2 && game.data.opening != 0) == (((i + startply) & 1) == 0) ? "black" : "white",
                 i >= game.currentView ? 'future' : 'past'
             ]}
             style:grid-column="{((i + startply) & 1) + 2} / span 1">

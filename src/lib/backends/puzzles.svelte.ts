@@ -1,7 +1,5 @@
 import { Game, TPSPosition } from "$lib/ingame/game.svelte";
-import type { GameBackend } from "./connector.svelte";
-import type { GameData } from "./playtak_stable.svelte";
-
+import type { GameBackend, GameData } from "./connector.svelte";
 
 
 type Puzzle = {
@@ -54,7 +52,9 @@ export const daily = new Game({
     size: 5, //TODO
     time: 0,
     inc: 0,
+    scaling_inc: false,
     halfkomi: 2,
+    opening: 0,
     flats: 21, //TODO
     caps: 1, //TODO
     rated: false,

@@ -54,7 +54,9 @@
             size: size,
             time: time,
             inc: incr,
+            scaling_inc: false,
             halfkomi: komi * 2,
+            opening: 1,
             flats: flats,
             caps: caps,
             rated: gametype != 0,
@@ -77,10 +79,12 @@
                 size: size,
                 time: 0,
                 inc: 0,
+                scaling_inc: false,
                 extra: 0,
                 trigger: 0,
                 color: 3,
                 halfkomi: komi * 2,
+                opening: 1,
                 flats: flats,
                 caps: caps,
                 rated: false,
@@ -98,10 +102,12 @@
                 size: -1,
                 time: 0,
                 inc: 0,
+                scaling_inc: false,
                 extra: 0,
                 trigger: 0,
                 color: 3,
                 halfkomi: 0,
+                opening: 1,
                 flats: -1,
                 caps: -1,
                 rated: false,
@@ -128,8 +134,9 @@
                 } else if (head.startsWith("Caps")) {
                     gameData.caps = parseInt(head.slice(6, -1))
                 } else if (head.startsWith("Opening")) {
-                    if (head != `Opening "swap`) {
-                        addToast("non-swap openings not yet supported!", true)
+                    gameData.opening = ["no-swap", "swap", "double black stack"].indexOf(head.slice(9, -1))
+                    if (gameData.opening == -1) {
+                        addToast("unsupported opening!", true)
                         return
                     }
                 } else if (head.startsWith("Clock")) {

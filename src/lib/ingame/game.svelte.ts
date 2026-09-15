@@ -149,7 +149,6 @@ export class Game {
     gameState: GameState = $state(GameState.Ongoing)
 
     state: State = State.None
-    selectedReserve: number = -1
     selectedPile: Array<number> = []
     startingTile: number = 0
     totals: number = 0
@@ -206,7 +205,7 @@ export class Game {
         this.highlight.length = 0
         let idx = move & 0x3F
         if ((move >> 8) == 0) {
-            this.highlight.push(this.board[idx][0])
+            this.highlight.push(...this.board[idx])
         } else {
             let drops = move >> 8 & 0xFF
             let delta = [1, 8, -1, -8][move >> 6 & 0x3]
@@ -334,8 +333,20 @@ export class Game {
             }
 
         } else { //its a placement
-            let color = (ply & 1) ^ (ply <= 2 ? 0 : 1)
-            let id = 0
+            let color = (ply & 1) ^ 1
+
+            let id
+            if (ply <= 2 && this.data.opening != 0) {
+                color ^= 1
+                if (this.data.opening == 2 && ply == 1) {
+                    id = (this.data.caps + this.reserve_flats[color]--) * 2 + color - 2
+                    this.highlight.push(id)
+                    this.pieces[id].position = idx
+                    this.pieces[id].height = 1
+                    this.board[idx][1] = id
+                }
+            }
+
             if ((move >> 6) == 2) { 
                 id = this.reserve_caps[color]-- * 2 + color - 2
             } else {
@@ -343,7 +354,7 @@ export class Game {
             }
             this.highlight.push(id)
             this.pieces[id].position = idx
-            this.board[idx] = [id]
+            this.board[idx][0] = id
             if ((move >> 6) == 1) {
                 this.pieces[id].type = PieceType.Wall
             }
@@ -389,18 +400,19 @@ export class Game {
             }
 
         } else { //its a placement
-            let p = this.board[idx][0]
-            this.board[idx] = []
-            if (this.pieces[p].type == PieceType.Cap){
-                this.reserve_caps[p & 1]++
-            } else {
-                this.reserve_flats[p & 1]++
-            }
-            if (this.pieces[p].type == PieceType.Wall) {
-                this.pieces[p].type = PieceType.Flat
-            }
-            this.pieces[p].position = -1
-            this.pieces[p].height = 0
+            this.board[idx].forEach((i, h) => {
+                if (this.pieces[i].type == PieceType.Cap) {
+                    this.reserve_caps[i & 1]++
+                } else {
+                    this.reserve_flats[i & 1]++
+                }
+                if (this.pieces[i].type == PieceType.Wall) {
+                    this.pieces[i].type = PieceType.Flat
+                }
+                this.pieces[i].position = -1
+                this.pieces[i].height = 0
+            })
+            this.board[idx] = []        
         }
 
         //find highlights
@@ -429,18 +441,20 @@ export class Game {
 
     deselect() {
         if (this.state == State.Reserve) {
-            this.pieces[this.selectedReserve].selected = false
-            if (this.pieces[this.selectedReserve].type == PieceType.Wall) {
-                this.pieces[this.selectedReserve].type = PieceType.Flat
-            }
-
+            this.selectedPile.forEach((i, h) => {
+                this.pieces[i].selected = false
+                if (this.pieces[i].type == PieceType.Wall) {
+                   this.pieces[i].type = PieceType.Flat
+                }
+            })
         } else if (this.state == State.Pile) {
-            this.selectedPile.forEach((i, idx) => {
+            this.selectedPile.forEach((i, h) => {
                 this.pieces[i].selected = false
                 this.pieces[i].position = this.startingTile
-                this.pieces[i].height = this.board[this.startingTile].length - this.selectedPile.length + idx
+                this.pieces[i].height = this.board[this.startingTile].length - this.selectedPile.length + h
             })
         }
+        this.selectedPile.length = 0
         this.state = State.None
     }
 
@@ -491,45 +505,31 @@ export class Game {
     clickReserve(type: PieceType) {
         if (!this.canPlay()) {return;}
 
-        let c = this.currentPly()
-       
+        if (this.state == State.Reserve && this.pieces[this.selectedPile[0]].type == PieceType.Flat) {
+            type = PieceType.Wall
+        }
+        this.deselect()
+
+        let c = this.currentPly()       
         let color = (c & 1)
-        if (c < 2) {color ^= 1}
-    
-        if (type == PieceType.Cap && c < 2) {
-            this.deselect()
-            return
+
+        if (c < 2 && this.data.opening != 0) {
+            color ^= 1
+            if (type != PieceType.Flat) { return }
+
+            if (this.data.opening == 2 && c == 0) {
+                let id = (this.data.caps + this.reserve_flats[color]) * 2 + color - 4
+                this.selectedPile.push(id)
+                this.pieces[id].selected = true
+            }
         }
 
         let id = (type == PieceType.Cap ? this.reserve_caps[color] : this.data.caps + this.reserve_flats[color]) * 2 + color - 2
 
-        if (this.state == State.None) {
-            this.state = State.Reserve
-            this.selectedReserve = id
-            this.pieces[id].selected = true
-
-        } else if (this.state == State.Reserve) {
-            if (this.selectedReserve == id) {
-                if (type == PieceType.Cap || c < 2) {
-                    this.deselect()
-                } else if (this.pieces[id].type == PieceType.Wall) {
-                    this.deselect()
-                } else {
-                    this.pieces[id].type = PieceType.Wall
-                }
-            } else {
-                this.deselect()
-                this.selectedReserve = id
-                this.pieces[id].selected = true
-                this.state = State.Reserve
-            }
-
-        } else {
-            this.deselect()
-            this.selectedReserve = id
-            this.pieces[id].selected = true
-            this.state = State.Reserve
-        }
+        this.state = State.Reserve
+        this.selectedPile.push(id)
+        this.pieces[id].selected = true
+        this.pieces[id].type = type
     }
 
     clickPile(x: number, y: number) {
@@ -555,18 +555,24 @@ export class Game {
         }
         else if (this.state == State.Reserve) {
             if (pile.length == 0) {
-                this.pieces[this.selectedReserve].selected = false
+                this.board[idx].length = 0
+                this.selectedPile.forEach((i, h) => {
+                    this.pieces[i].selected = false
+                    this.board[idx].push(i)
+                    this.pieces[i].position = idx
+                    this.pieces[i].height = h
+
+                    if (this.pieces[i].type == PieceType.Cap) {
+                        this.reserve_caps[i & 1] -= 1
+                    } else {
+                        this.reserve_flats[i & 1] -= 1
+                    }
+                })
                 this.state = State.None
-                this.board[idx] = [this.selectedReserve]
-                this.pieces[this.selectedReserve].position = idx
-                this.pieces[this.selectedReserve].height = 0
-                if (this.pieces[this.selectedReserve].type == PieceType.Cap) {
-                    this.reserve_caps[this.selectedReserve & 1] -= 1
-                } else {
-                    this.reserve_flats[this.selectedReserve & 1] -= 1
-                }
-                
-                this.sendMove((this.pieces[this.selectedReserve].type << 6) | idx)
+
+                //move encoding gets funky with this, but we can assume if theres more theyll all be flats, which will cause correct move serialization
+                this.sendMove((this.pieces[this.selectedPile[0]].type << 6) | idx)
+
             } else if (this.currentPly() < 2) {
                 this.deselect()
             } else {
@@ -576,9 +582,7 @@ export class Game {
                 this.startingTile = idx
                 this.totals = 0
                 this.drops = 0
-                for (let i of this.selectedPile) {
-                    this.pieces[i].selected = true
-                }
+                this.selectedPile.forEach((i, h) => {this.pieces[i].selected = true})
             }
         }
         else {

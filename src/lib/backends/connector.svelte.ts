@@ -11,6 +11,12 @@ enum Color {
     Both = 3
 }
 
+enum Opening {
+    Nothing,
+    Swap,
+    Double_Black_Stack
+}
+
 export type GameData = {
     id: number,
     p1: string,
@@ -18,10 +24,12 @@ export type GameData = {
     size: number,
     time: number,
     inc: number,
+    scaling_inc: boolean,
     extra: number,
     trigger: number,
     color: Color,
     halfkomi: number,
+    opening: Opening,
     flats: number,
     caps: number,
     rated: boolean,
