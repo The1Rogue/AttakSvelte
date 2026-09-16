@@ -17,7 +17,7 @@
         p2: "",
         color: 3,
         size: 6,
-        time: 10,
+        time: 600,
         inc: 15,
         scaling_inc: false,
         halfkomi: 4,
@@ -33,7 +33,7 @@
 
     let gametype = $state(0)
     let komi = $state(2)
-
+    let time = $state(10)
     let ptn = $state("")
 
     const defaultflats = [10, 15, 21, 30, 40, 50]
@@ -50,6 +50,7 @@
         settings.halfkomi = komi * 2
         settings.rated = gametype != 0
         settings.tourney = gametype == 2
+        settings.time = time * 60
         search(settings)
         goto("/")
     }
@@ -206,7 +207,7 @@
             <label>Komi: <br/><input type=number min=0 max=4 step=.5 bind:value={komi} title="a flat score added for black when the game ends on flats"/></label>
 
 
-            <label>Time: (minutes)<br/><input type=number min=1 max=180 bind:value={settings.time}/></label>
+            <label>Time: (minutes)<br/><input type=number min=1 max=180 bind:value={time}/></label>
             <label>Increment: (seconds)<br/><input type=number min=0 max=180 bind:value={settings.inc}/></label>
             <label>Extra Time: (minutes)<br/><input type=number min=0 max=60 bind:value={settings.extra} title="extra time added once at the trigger move"/></label>
             <label>Trigger: <br/><input type=number min=0 max=60 step=5 bind:value={settings.trigger} title="when extra time is given"/></label>

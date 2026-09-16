@@ -127,7 +127,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         else if (msg.startsWith("Seek new")) {
             let cmd = msg.split(" ")
 
-            if (cmd[15] != this.username && cmd[15] != "0") {
+            if (cmd[16] != this.username && cmd[16] != "0") {
                 return
             }
 
