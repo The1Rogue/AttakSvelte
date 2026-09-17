@@ -26,6 +26,6 @@
     <p>{seek.size}s +{seek.halfkomi/2} komi</p>
     <p>{seek.time / 60}'+{increment}"
     {#if seek.extra > 0}
-        +{seek.extra/60}@{seek.trigger}
+        +{seek.extra/60}'@{seek.trigger}
     {/if}</p>
 </button>

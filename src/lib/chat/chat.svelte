@@ -1,12 +1,12 @@
 
 <script lang="ts">
-    import { leave_room } from "$lib/backends/connector.svelte";
+    import { disconnect, leave_room } from "$lib/backends/connector.svelte";
     import { sendChat, chats } from "$lib/chat/chats.svelte";
 	import { tick } from 'svelte';
 
     let {room, chat} = $props()
     let current_msg = $state("")
-    let open = $state(false) //todo this aint enough
+    let open = $state(false)
 
     let div: HTMLElement;
 
@@ -19,25 +19,32 @@
         return hash;
     }
 
-    $effect.pre(()=>{
+    $effect.pre(() => {
         chat[1].length
-        if (!div) return
+        if (!div || !open) return
 
 		if (div.offsetHeight + div.scrollTop > div.scrollHeight - 20) {
 			tick().then(() => {
 				div.scrollTo(0, div.scrollHeight);
-                chat[2] = false;
 			});
 		}
     })
+
+    function checkRead() {
+        if (!div) {return}
+        if(div.offsetHeight + div.scrollTop > div.scrollHeight - 20) {
+            chat[2] = false;
+        }   
+    }
+
 </script>
 
 
-<details class="room">
+<details class="room" ontoggle={() => {setTimeout(checkRead, 400)}}>
     <summary onclick={() => {open = !open}}>
         {chat[0] == 1 ? room.split("-").join(" vs. ") : room}
         <div style="flex-grow:1;"></div>
-        {#if chat[2] && !open}<div class="notif"></div>{/if}
+        {#if chat[2]}<div class="notif"></div>{/if}
         
         {#if chat[0] != 0}
             <button class="close rounded_button material-symbols-outlined" onclick={() => {
@@ -49,7 +56,7 @@
         {/if}
     </summary>
 </details>
-<div bind:this={div} style:max-height={open ? "100%" : "0"}>
+<div bind:this={div} style:max-height={open ? "100%" : "0"} onscroll={checkRead}>
     <p></p>
     {#each chat[1] as [user, msg]}
         <p>&lt<strong style="color: hsl({hash(user)} 100% 65%)">{user}</strong>&gt {msg}</p>

@@ -97,9 +97,9 @@
                 <button class="seek go_button" style:--columns=2 onclick={() => spectate(parseInt(i))}> 
                     <p>{seek.p1} - {seek.p2}</p>
                     <p>{seek.size}s +{seek.halfkomi/2} komi</p>
-                    <p>{seek.time / 60}'+{seek.scaling_inc ? (seek.inc != 1 ? seek.inc + "n" : "n") : seek.inc}
+                    <p>{seek.time / 60}'+{seek.scaling_inc ? (seek.inc != 1 ? seek.inc + "n" : "n") : seek.inc}"
                     {#if seek.extra > 0}
-                        + {seek.extra/60}@{seek.trigger}
+                        + {seek.extra/60}'@{seek.trigger}
                     {/if}
                     </p>
                 </button>
