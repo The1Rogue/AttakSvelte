@@ -50,7 +50,3 @@ export function sendChat(room: string, msg: string) {
 }
 
 chats["Global"] = [RoomType.Global, [], false]
-
-for (let i = 0; i < 20; i++){
-    addMsg("TEST", "Global", "teest")
-}
