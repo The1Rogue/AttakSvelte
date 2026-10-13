@@ -395,6 +395,10 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         }
         return resp.json().then((json) => {return json.items})
     }
+
+    change_password(old_pass: string, new_pass: string) {
+        this.ws?.send(`ChangePassword ${old_pass} ${new_pass}`)
+    }
 }
 
 

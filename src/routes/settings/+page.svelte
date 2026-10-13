@@ -4,15 +4,13 @@
     import Miniboard from "$lib/ingame/miniboard.svelte";
     import ColorPicker from "$lib/ui/colorPicker.svelte";
     import { onNavigate } from "$app/navigation";
+    import { ACTIVE_BACKEND } from "$lib/backends/connector.svelte"
 
     let oldPass = $state("")
     let newPass = $state("")
     let newPass2 = $state("")
 
-
-
     onNavigate(save)
-
 
     function save() {
         localStorage.setItem("theme", JSON.stringify(theme))
@@ -97,8 +95,7 @@
             <h3>change password:</h3>
             <form onsubmit={() => {
                 if (newPass == newPass2) {
-                    addToast("complain to the1Rogue about implementing this", true)
-                    // send(`ChangePassword ${oldPass} ${newPass}`)
+                    ACTIVE_BACKEND.change_password(oldPass, newPass)
                     oldPass = ""    
                 } else {
                     addToast("Passwords don't match", true)

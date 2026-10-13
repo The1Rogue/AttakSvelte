@@ -55,6 +55,8 @@ export interface OnlineBackend {
     
     get_rating: (user: string) => Promise<number>,
     get_history: (options: Object) => Promise<Array<Object>>,
+
+    change_password: (old_pass: string, new_pass: string) => void,
 }
 
 export interface GameBackend {
@@ -67,7 +69,7 @@ export interface GameBackend {
 }
 
 
-const ACTIVE_BACKEND = playtakStableBackend
+export const ACTIVE_BACKEND = playtakStableBackend
 
 // const backends: Array<OnlineBackend> = [playtakStableBackend]
 
