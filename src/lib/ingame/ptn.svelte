@@ -1,15 +1,15 @@
 <script lang="ts">
     let { game } = $props()
     import { moveString } from "$lib/ingame/game.svelte"
+    import { addToast } from "$lib/ui/toast.svelte";
     let w = $state(1)
     let h = $state(1)
     let a = $derived(w / h)
 
-
     let startply = game.startPos == undefined ? 0 : game.startPos.ply
 
     function undoButton() {
-        if (game.history.size <= 0) {return}
+        if (game.history.length <= 0) {return}
         if (game.data.color == 3) {
             game.removeLast()
         } else if (game.backend == undefined) {
@@ -22,7 +22,7 @@
 
     function resignButton() {
         if (game.backend != undefined) {
-            game.backend.resign(game.data.id)
+            game.backend.resign(game)
         }
     }
 

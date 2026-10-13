@@ -10,11 +10,25 @@
         goto("/")
     }
 
+    function onKeyDown(e: KeyboardEvent) {
+        switch(e.keyCode) {
+            case 8:
+                games[selected].reset()
+                break;
+            case 37:
+                games[selected].undo()
+                break;
+            case 39:
+                games[selected].do()
+                break;
+        }
+    }
+
     let selected = $state(0)
 </script>
 
 
-<div class="holder">
+<div class="holder" tabindex=0 onkeydown={onKeyDown}>
     <PTN game={Object.values(games)[selected]}/>
     <div 
         class="boards"

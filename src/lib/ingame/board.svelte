@@ -8,20 +8,6 @@
     
     let { game, bare } = $props()  
 
-    function onKeyDown(e: KeyboardEvent) {
-        switch(e.keyCode) {
-            case 8:
-                game.reset()
-                break;
-            case 37:
-                game.undo()
-                break;
-            case 39:
-                game.do()
-                break;
-        }
-    }
-
     let timew = $derived((game.timew / 60000 | 0) + ":" + ("" + ((game.timew / 1000 | 0) % 60)).padStart(2, "0"))
     let timeb = $derived((game.timeb / 60000 | 0) + ":" + ("" + ((game.timeb / 1000 | 0) % 60)).padStart(2, "0"))
 
@@ -30,7 +16,7 @@
 
 
     <!-- <PTN game={game}/> -->
-<div class="holder" style:--size={game.data.size} onfocusout={() => {if (!this.matches(":focus-within")) game.deselect()}} onkeydown={onKeyDown}>
+<div class="holder" style:--size={game.data.size} onfocusout={() => {if (!this.matches(":focus-within")) game.deselect()}}>
 
     {#if showMenu}
         <GameEnd game={game} hide={() => showMenu = false}/>

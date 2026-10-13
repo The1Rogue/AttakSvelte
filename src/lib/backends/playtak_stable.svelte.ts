@@ -266,10 +266,12 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 game.end(GameStateStrings.indexOf(cmd[2]))
             } else if (cmd[1] == "OfferDraw") {
                 game.drawReq |= 1
+                addToast("Your opponent offers a draw", false)
             } else if (cmd[1] == "RemoveDraw") {
                 game.drawReq &= 2
             } else if (cmd[1] == "RequestUndo") {
                 game.undoReq |= 1
+                addToast("Your opponent requests an undo", false)
             } else if (cmd[1] == "RemoveUndo") {
                 game.undoReq &= 2
             } else if (cmd[1] == "Undo") {

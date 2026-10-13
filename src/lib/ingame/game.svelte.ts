@@ -95,7 +95,6 @@ export class TPSPosition {
                     if (sq.length == 1) {idx++}
                     else {idx += sq.charCodeAt(1) - 0x30}
                 } else {
-
                     for (let piece of sq) {
                         if (piece == "1") {
                             pieceid = (caps + --pos.flats[0]) * 2
