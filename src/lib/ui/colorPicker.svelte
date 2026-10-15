@@ -114,7 +114,8 @@
         align-self: stretch;
         margin: 2px;
         border-radius: 15%;
-        aspect-ratio: 1;
+        height: 2.2em;
+        width: 2.2em;
     }
 
     .slider {
