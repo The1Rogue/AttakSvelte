@@ -4,6 +4,11 @@ import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
 import { playtakStableBackend } from "./playtak_stable.svelte"
 
+
+import startSound from "$lib/assets/start.mp3"
+
+const startAudio = new Audio(startSound)
+
 enum Color {
     Neither = 0,
     White = 1,
@@ -122,6 +127,7 @@ export function addGame(game: Game) {
         return //replace instead??
     }
 
+    startAudio.play()
     games.push(game)
     goto("/game")
 }

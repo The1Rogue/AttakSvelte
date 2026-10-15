@@ -1,6 +1,14 @@
 
 import type { GameBackend, GameData } from "$lib/backends/connector.svelte"
 
+import moveSound from "$lib/assets/move.mp3"
+import endSound from "$lib/assets/end.mp3"
+import timeSound from "$lib/assets/time.mp3"
+
+const moveAudio = new Audio(moveSound)
+const endAudio = new Audio(endSound)
+const timeAudio = new Audio(timeSound)
+
 //move: number
 //
 //0x0003F   << 0    position
@@ -225,13 +233,16 @@ export class Game {
     tick() {
         if (this.gameState != GameState.Ongoing) {clearInterval(this.timer)}
         if ((this.currentPly() & 1) == 0) {
+            if (this.timew > 10_000 && this.timew < 11_000) {timeAudio.play()}
             this.timew = Math.max(0, this.timew - 1000)
         } else {
+            if (this.timeb > 10_000 && this.timeb < 11_000) {timeAudio.play()}
             this.timeb = Math.max(0, this.timeb - 1000)
         }
     }
 
     sendMove(move: number) {
+        moveAudio.play()
         this.currentView++
         this.history.push(move)
         if (this.backend != undefined) {
@@ -304,6 +315,7 @@ export class Game {
 
     do() {
         if (this.currentView == this.history.length) {return}
+        moveAudio.play()
         let move = this.history[this.currentView++]
         let ply = this.startPos == undefined ? this.currentView : this.currentView + this.startPos.ply
         let idx = move & 0x3F
@@ -363,6 +375,7 @@ export class Game {
     undo() {
         this.deselect()
         if (this.currentView == 0) {return}
+        moveAudio.play()
         let move = this.history[--this.currentView]
         let idx = move & 0x3F
 
@@ -423,6 +436,7 @@ export class Game {
     }
 
     end(result: number) {
+        endAudio.play()
         this.gameState = result
         this.backend = undefined;
     }
