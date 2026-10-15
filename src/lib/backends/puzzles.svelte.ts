@@ -45,7 +45,6 @@ class PuzzleBackend implements GameBackend {
 export const puzzleBackend = new PuzzleBackend()
 
 export const daily = new Game({
-    id: 1,
     p1: (puzzle.startpos.ply & 1) == 0 ? "You" : "Opponent",
     p2: (puzzle.startpos.ply & 1) == 0 ? "Opponent" : "You",
     color: (puzzle.startpos.ply & 1) + 1,
@@ -61,4 +60,4 @@ export const daily = new Game({
     tourney: false,
     trigger: 0,
     extra: 0,
-}, puzzle.startpos, puzzleBackend)
+}, puzzleBackend, puzzle.startpos)

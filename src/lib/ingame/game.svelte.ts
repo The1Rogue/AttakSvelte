@@ -149,7 +149,7 @@ export class Game {
     startPos: TPSPosition | undefined
 
     data: GameData
-    backend: GameBackend | undefined
+    backend: GameBackend
     pieces: Array<Piece> = $state([])
     board: Array<Array<number>> = $state([])
 
@@ -178,7 +178,7 @@ export class Game {
 
     highlight: Array<number> = $state([])
 
-    constructor(info: GameData, startPos: TPSPosition | undefined = undefined, backend: GameBackend | undefined = undefined) {
+    constructor(info: GameData, backend: GameBackend, startPos: TPSPosition | undefined = undefined) {
         this.data = info
         this.backend = backend
 
@@ -245,9 +245,7 @@ export class Game {
         moveAudio.play()
         this.currentView++
         this.history.push(move)
-        if (this.backend != undefined) {
-            this.backend.send_move(move, this)
-        }
+        this.backend.send_move(move, this)
 
         if (this.timer < 0) {
             this.timer = window.setInterval(this.tick.bind(this), 1000)
@@ -438,7 +436,6 @@ export class Game {
     end(result: number) {
         endAudio.play()
         this.gameState = result
-        this.backend = undefined;
     }
 
     canPlay(): boolean {

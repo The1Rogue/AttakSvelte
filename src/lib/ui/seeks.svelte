@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { GameData } from "$lib/backends/connector.svelte"
-    import { addGame, search, player_seeks, bot_seeks, ongoing, spectate } from "$lib/backends/connector.svelte";
+    import { search, player_seeks, bot_seeks, ongoing, spectate } from "$lib/backends/connector.svelte";
 
     import Seek from "$lib/ui/seek.svelte"
 
@@ -18,7 +18,6 @@
         let caps =  [0, 0, 1, 1, 2, 2][size-3]
 
         let game: GameData = {
-            id: 0,
             p1: "",
             p2: opponent,
             color: 3,

@@ -3,6 +3,7 @@
     import { goto } from "$app/navigation";
     import { addGame, search, type GameData } from "$lib/backends/connector.svelte";
     import { GameStateStrings } from "$lib/backends/playtak_stable.svelte";
+    import { scratchBackend } from "$lib/backends/scratch.svelte";
 
     import { Game, parsePtn, TPSPosition } from "$lib/ingame/game.svelte"
     import { addToast } from "$lib/ui/toast.svelte";
@@ -12,7 +13,6 @@
     const commentRegex = /{[^{]*}|[0-9]+\./g //also includes move numbering
 
     let settings: GameData = $state({
-        id: 0,
         p1: "",
         p2: "",
         color: 3,
@@ -57,8 +57,7 @@
 
     function createScratch() {
         if (ptn == "") {
-            addGame(new Game({
-                id: 0,
+            scratchBackend.requestGame({
                 p1: "White",
                 p2: "Black",
                 size: settings.size,
@@ -74,14 +73,13 @@
                 caps: settings.caps,
                 rated: false,
                 tourney: false
-            }, undefined))
+            })
 
         } else {
             let result = 0
             let tps = undefined
 
             let gameData: GameData = {
-                id: 0,
                 p1: "White",
                 p2: "Black",
                 size: -1,
@@ -158,7 +156,7 @@
             ptn2 = ptn2.replaceAll(commentRegex, "")
             let moves = ptn2.matchAll(ptnRegex)
 
-            let game = new Game(gameData, startPos)
+            let game = new Game(gameData, scratchBackend, startPos)
             game.gameState = result
 
             for (let move of moves) {

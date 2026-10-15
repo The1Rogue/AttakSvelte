@@ -8,6 +8,7 @@ import { addDirect, addMsg, addRoom } from "$lib/chat/chats.svelte"
 import { player_seeks, bot_seeks, ongoing, addGame, getGame, disconnect, type GameData } from "$lib/backends/connector.svelte"
 import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
+import { goto } from '$app/navigation';
 
 
 export const GameStateStrings = ["0-0", "1/2-1/2", "F-0", "0-F", "R-0", "0-R", "1-0", "0-1"]
@@ -218,7 +219,12 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 trigger: parseInt(cmd[13]),
                 extra: parseInt(cmd[14]),
             }
-            addGame(new Game(gameData, undefined, this))
+            if (getGame(gameData.id) != undefined) {
+                goto("/game")
+                return
+            }
+
+            addGame(new Game(gameData, this))
             let players = [cmd[2], cmd[3]]
             players.sort()
             this.ws?.send("JoinRoom " + players.join("-"))
@@ -243,7 +249,11 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 trigger: parseInt(cmd[16]),
                 extra: parseInt(cmd[17]),
             }
-            addGame(new Game(gameData, undefined, this))
+            if (getGame(gameData.id) != undefined) {
+                goto("/game")
+                return
+            }
+            addGame(new Game(gameData, this))
             let opp = cmd[6] == "white" ? cmd[5] : cmd[3]
             addDirect(opp)
         } 

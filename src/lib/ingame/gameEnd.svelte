@@ -23,7 +23,7 @@
             {/if}
             </p>
         {/if}
-        {#if game.backend != undefined}
+        {#if "id" in game.data}
             <button class="rounded_button" onclick={() => {navigator.clipboard.writeText(game.data.id); addToast("Game ID copied!", false)}} title="click to copy">Game ID: {game.data.id}</button>
         {/if}
         <button class="rounded_button" onclick={() => closeGame(game.data.id)}> Close Game </button>

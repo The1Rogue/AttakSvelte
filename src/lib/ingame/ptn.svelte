@@ -1,7 +1,6 @@
 <script lang="ts">
     let { game } = $props()
     import { moveString } from "$lib/ingame/game.svelte"
-    import { addToast } from "$lib/ui/toast.svelte";
     let w = $state(1)
     let h = $state(1)
     let a = $derived(w / h)
@@ -10,27 +9,13 @@
 
     function undoButton() {
         if (game.history.length <= 0) {return}
-        if (game.data.color == 3) {
-            game.removeLast()
-        } else if (game.backend == undefined) {
-            //TODO ???
-        } else {
-            game.undoReq ^= 2
-            game.backend.requestUndo(game, (game.undoReq & 2) == 0)
-        }
-    }
-
-    function resignButton() {
-        if (game.backend != undefined) {
-            game.backend.resign(game)
-        }
+        game.undoReq ^= 2
+        game.backend.requestUndo(game, (game.undoReq & 2) == 0)
     }
 
     function drawButton() {
-        if (game.backend != undefined) {
-            game.drawReq ^= 2
-            game.backend.requestDraw(game, (game.drawReq & 2) == 0)
-        }
+        game.drawReq ^= 2
+        game.backend.requestDraw(game, (game.drawReq & 2) == 0)
     }
 
 </script>
@@ -41,7 +26,7 @@
 {#if game.data.color != 0}
     <div class="metabuttons">
         <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.undoReq]} onclick={() => undoButton()}>undo</button>
-        <button class="material-symbols-outlined rounded_button" onclick={() => resignButton()}>flag</button>
+        <button class="material-symbols-outlined rounded_button" onclick={() => game.backend.resign(game)}>flag</button>
         <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.drawReq]} onclick={() => drawButton()}>handshake</button>
     </div>
 {/if}

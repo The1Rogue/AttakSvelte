@@ -23,7 +23,6 @@ enum Opening {
 }
 
 export type GameData = {
-    id: number,
     p1: string,
     p2: string,
     size: number,
@@ -76,10 +75,6 @@ export interface GameBackend {
 
 export const ACTIVE_BACKEND = playtakStableBackend
 
-// const backends: Array<OnlineBackend> = [playtakStableBackend]
-
-// let active_backend: number = $state(-1)
-
 let rating_cache: {[key: string]: number} = {}
 export let games: Array<Game>                      = $state([])
 export let ongoing: {[key: number]: GameData}      = $state({})
@@ -121,12 +116,10 @@ export function disconnect() {
 }
 
 export function addGame(game: Game) {
-    //TODO checks for  //this comment left by me at one point seems unfinished... not sure what im supposed to be checking....
-    if (games.find((e) => e.data.id == game.data.id && e.backend == game.backend)) {
+    if (games.includes(game)) {
         goto("/game")
-        return //replace instead??
+        return
     }
-
     startAudio.play()
     games.push(game)
     goto("/game")
@@ -170,7 +163,10 @@ export function acceptGame(id: number) {
 }
 
 export function spectate(id: number) {
-    if (games.find((e) => e.data.id == id)) {return}
+    if (games.find((e) => e.data.id == id)) {
+        goto("/game")
+        return
+    }
     ACTIVE_BACKEND.spectate(id)
 }
 
