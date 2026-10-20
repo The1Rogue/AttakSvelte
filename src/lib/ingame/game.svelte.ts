@@ -4,6 +4,7 @@ import type { GameBackend, GameData } from "$lib/backends/connector.svelte"
 import moveSound from "$lib/assets/move.mp3"
 import endSound from "$lib/assets/end.mp3"
 import timeSound from "$lib/assets/time.mp3"
+import { GameStateStrings } from "$lib/backends/playtak_stable.svelte"
 
 const moveAudio = new Audio(moveSound)
 const endAudio = new Audio(endSound)
@@ -143,6 +144,37 @@ export class TPSPosition {
         return [pos, size]
     }
 
+    getTPS(size: number): string {
+        let str = ""
+
+        let skips = 0
+        for (let y = size*8 - 8; y >= 0; y-=8) {
+            for (let x = 0; x < size; x++) {
+                let stack = this.board[y + x]
+                if (stack.length == 0) {skips++}
+                else {
+                    if (skips > 0) {str += skips == 1 ? "x," : `x${skips},`}
+                    skips = 0
+                    for (let piece of stack) {
+                        str += (this.pieces[piece].id & 1) == 0 ? "1" : "2"
+                    }
+                    str += ["", "S", "C"][this.pieces[stack[stack.length-1]].type]
+                    if (x != size - 1) {str += ","}
+                }
+            }
+            if (skips > 0) {str += skips == 1 ? "x" : `x${skips}`}
+            skips = 0
+            if (y > 0) {
+                str += "/"
+            }
+        }
+
+
+        str += (this.ply & 1) == 0 ? " 1 " : " 2 " 
+        str += (2 + this.ply >> 1).toString()
+
+        return str
+    }
 }
 
 export class Game {
@@ -714,6 +746,81 @@ export class Game {
             }
         }
     }
+
+    getCurrentTPS(): string {
+
+        let str = ""
+
+        let skips = 0
+        for (let y = this.data.size*8 - 8; y >= 0; y-=8) {
+            for (let x = 0; x < this.data.size; x++) {
+                let stack = this.board[y + x]
+                if (stack.length == 0) {skips++}
+                else {
+                    if (skips > 0) {str += skips == 1 ? "x," : `x${skips},`}
+                    skips = 0
+                    for (let piece of stack) {
+                        str += (this.pieces[piece].id & 1) == 0 ? "1" : "2"
+                    }
+                    str += ["", "S", "C"][this.pieces[stack[stack.length-1]].type]
+                    if (x != this.data.size - 1) {str += ","}
+                }
+            }
+            if (skips > 0) {str += skips == 1 ? "x" : `x${skips}`}
+            skips = 0
+            if (y > 0) {
+                str += "/"
+            }
+        }
+
+
+        let ply = this.startPos == undefined ? this.currentView : this.currentView + this.startPos.ply
+        str += (ply & 1) == 0 ? " 1 " : " 2 " 
+        str += (2 + ply >> 1).toString()
+
+        return str
+    }
+
+    getPTN(): string {
+        //TODO opening header, 
+        let opening = ["no-swap", "swap", "double black stack"][this.data.opening]
+        let komi = (this.data.halfkomi & 1) == 1 ? `${this.data.halfkomi >> 1}.5` : (this.data.halfkomi >> 1).toString()
+        let str = `[Player1 "${this.data.p1}"]\n[Player2 "${this.data.p2}"]\n[Size "${this.data.size}"]\n[Komi "${komi}"]
+[Flats "${this.data.flats}"]\n[Caps "${this.data.caps}"]\n[Opening "${opening}"]\n`
+
+        if (this.data.time > 0) {
+            let clock = splitClock(this.data.time)
+            clock += this.data.scaling_inc ? this.data.inc == 1 ? " +n" : ` +${splitClock(this.data.inc)}n` : ` +${splitClock(this.data.inc)}`
+            if (this.data.extra > 0) {
+                clock += ` @${this.data.trigger} +${splitClock(this.data.extra)}`
+            }
+            str += `[Clock "${clock}"]\n`
+        }
+
+        if (this.startPos != undefined) {
+            str += `[TPS "${this.startPos.getTPS(this.data.size)}"]\n` //TODO
+        }
+
+        if (this.gameState != GameState.Ongoing) {
+            str += `[Result "${GameStateStrings[this.gameState]}"]\n`
+        }
+
+        let startply = this.startPos == undefined ? 0 : this.startPos.ply
+
+        if ((startply & 1) == 1) {
+            str += `\n${1 + startply >> 1}. --`
+        }
+
+        for (let i = 0; i < this.history.length; i++) {
+            let ply = i + startply
+            if ((ply & 1) == 0) {
+                str += `\n${2 + ply >> 1}.`
+            }
+            str += " " + moveString(this.history[i])
+        }
+
+        return str
+    }
 }
 
 export function moveString(move: number): string {
@@ -800,54 +907,9 @@ export function parsePtn(s: string): number {
     return 0
 }
 
-// addGame( new Game({
-//     id: 0,
-//     p1: "White",
-//     p2: "Black",
-//     size: 6,
-//     time: 0,
-//     inc: 0,
-//     extra: 0,
-//     trigger: 0,
-//     color: 3,
-//     halfkomi: 2,
-//     flats: 30,
-//     caps: 1,
-//     rated: false,
-//     tourney: false
-// }))
-
-
-// let moves: Array<string> = [
-// "f6", "e6",
-// "d4", "d3",
-// "e4", "f4",
-// "f5", "Ce5",
-// "f3", "d5",
-// "c4", "c5",
-// "b4", "b5",
-// "a4", "e5-",
-// "Ce5", "a5",
-// "e5<", "a5-",
-// "e5", "c3",
-// "a5", "2e4<",
-// "e4", "e3",
-// "f2", "b3",
-// "f1", "e3+",
-// "f3+", "Sf3",
-// "c6", "f3+",
-// "a5-", "2f4+",
-// "e5-", "3d4>",
-// "2d5>11*", "e3",
-// "a3", "a2",
-// "a3>", "a5",
-// "c6-", "Sd5",
-// "d6", "b2",
-// "3f5-12", "4e4>",
-// "2f3<11", "e2",
-// "f5+"]
-
-// for (let move of moves) {
-//     let m = parsePtn(move)
-//     games[0].addMove(m)
-// }
+function splitClock(t: number): string {
+    if (t < 60) {
+        return t.toString()
+    }
+    return `${Math.floor(t/60)}:${t%60}`
+}

@@ -53,7 +53,7 @@ export const daily = new Game({
     inc: 0,
     scaling_inc: false,
     halfkomi: 2,
-    opening: 0,
+    opening: 1,
     flats: 21, //TODO
     caps: 1, //TODO
     rated: false,

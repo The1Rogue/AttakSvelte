@@ -83,7 +83,8 @@
         <h2>Settings</h2>
 
         <label>Animation speed <div><input style="" type="range" min=0 max=500 step=25 bind:value={settings.animation_speed}/> {settings.animation_speed}ms</div></label>
-        <label>Fast inputs <input type="checkbox" bind:checked={settings.fast_moves}/></label>
+        <label>Fast inputs <div class="material-symbols-outlined" title="use ptn ninja style fast inputs.
+allows for faster moves, but is more prone to misclicks"><input type="checkbox" bind:checked={settings.fast_moves}/> help</div></label>
 
         <!-- <Settings settings={settings} /> -->
     </div>
@@ -165,7 +166,12 @@
         justify-content: space-between;
         align-items: center;
         min-height: 2.5em;
+
         * {
+            vertical-align: .4em;
+        }
+
+        input[type=range] {
             height: 100%;
             vertical-align:-.5em;
         }

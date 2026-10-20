@@ -9,11 +9,11 @@
 </script>
 
 <div class="overlay" onclick={hide}>
-    <div class="endBox">
+    <div class="infoBox" onclick={(e) => e.stopPropagation()}>
         {#if game.gameState == 0}
-            <p>Game is Ongoing</p>
+            <p style="width:100%">Game is Ongoing</p>
         {:else}
-            <p>Game Ended: {GameStateStrings[game.gameState]}<br/>
+            <p style="width:100%">Game Ended: {GameStateStrings[game.gameState]}<br/>
             {#if game.gameState == 1}
                 it's a draw
             {:else if (game.gameState & 1) == 0}
@@ -23,6 +23,10 @@
             {/if}
             </p>
         {/if}
+
+        <button class="rounded_button" onclick={() => {navigator.clipboard.writeText(game.getPTN()); addToast("PTN copied!", false)}}>Copy PTN</button>
+        <button class="rounded_button" onclick={() => {navigator.clipboard.writeText(game.getCurrentTPS()); addToast("TPS copied!", false)}}>Copy TPS</button>
+
         {#if "id" in game.data}
             <button class="rounded_button" onclick={() => {navigator.clipboard.writeText(game.data.id); addToast("Game ID copied!", false)}} title="click to copy">Game ID: {game.data.id}</button>
         {/if}
@@ -46,11 +50,20 @@
     }
 
 
-    .endBox {
+    .infoBox {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
         background-color: var(--ui);
         color: var(--text_light);
         padding: 10px;
         border-radius: 10px;
+        width: 33%;
+        > * {
+            /* min-width: 40%; */
+            flex-grow: 1;
+            margin: .25em;
+        }
     }
 
     p {

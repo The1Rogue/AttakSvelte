@@ -3,7 +3,7 @@
 
 <script lang="ts">
 
-    import GameEnd from "$lib/ingame/gameEnd.svelte"
+    import GameInfo from "$lib/ingame/gameInfo.svelte"
     import { theme } from "$lib/theme.svelte";
     
     let { game, bare } = $props()  
@@ -19,7 +19,7 @@
 <div class="holder" style:--size={game.data.size} onfocusout={() => {if (!this.matches(":focus-within")) game.deselect()}}>
 
     {#if showMenu}
-        <GameEnd game={game} hide={() => showMenu = false}/>
+        <GameInfo game={game} hide={() => showMenu = false}/>
     {/if}
 
     {#if !bare}
