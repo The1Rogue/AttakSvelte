@@ -16,7 +16,7 @@ const timeAudio = new Audio(timeSound)
 //0x000C0   << 6    direction
 //0x0FF00   << 8    drops
 //0x10000   << 16   smash flag
-//0x000C0   << 6    piece type  
+//0x000C0   << 6    piece type
 
 enum Color {
     Neither = 0,
@@ -124,9 +124,9 @@ export class TPSPosition {
                             pos.flats[pieceid & 1]++
                             pos.pieces[pieceid].position = -1
                             pos.pieces[pieceid].height = 0
-                            
+
                             pieceid = --pos.caps[pieceid & 1] * 2 + (pieceid & 1)
-                            
+
                             pos.board[idx][pos.board[idx].length-1] = pieceid
                             pos.pieces[pieceid].position = idx
                             pos.pieces[pieceid].height = pos.board[idx].length - 1
@@ -170,7 +170,7 @@ export class TPSPosition {
         }
 
 
-        str += (this.ply & 1) == 0 ? " 1 " : " 2 " 
+        str += (this.ply & 1) == 0 ? " 1 " : " 2 "
         str += (2 + this.ply >> 1).toString()
 
         return str
@@ -248,7 +248,7 @@ export class Game {
         } else {
             let drops = move >> 8 & 0xFF
             let delta = [1, 8, -1, -8][move >> 6 & 0x3]
-            let total = 32 - Math.clz32(drops)              
+            let total = 32 - Math.clz32(drops)
             drops = (drops << Math.clz32(drops) - 24) & 0x7F
             while (drops > 0) {
                 idx += delta
@@ -303,6 +303,7 @@ export class Game {
             this.undo()
         }
         this.history.pop()
+        this.gameState = GameState.Ongoing
     }
 
     goto(idx: number) {
@@ -388,7 +389,7 @@ export class Game {
                 }
             }
 
-            if ((move >> 6) == 2) { 
+            if ((move >> 6) == 2) {
                 id = this.reserve_caps[color]-- * 2 + color - 2
             } else {
                 id = (this.data.caps + this.reserve_flats[color]--) * 2 + color - 2
@@ -410,10 +411,10 @@ export class Game {
         let idx = move & 0x3F
 
         if ((move >> 8) > 0) { //its a spread
-            let drops = move >> 8 & 0xFF                    
-            let total = 32 - Math.clz32(drops)              
-            let delta = [1, 8, -1, -8][move >> 6 & 0x3]     
-            let current = idx + delta                       
+            let drops = move >> 8 & 0xFF
+            let total = 32 - Math.clz32(drops)
+            let delta = [1, 8, -1, -8][move >> 6 & 0x3]
+            let current = idx + delta
 
             drops = (drops << Math.clz32(drops) - 24) & 0x7F
             while (drops > 0) {
@@ -454,14 +455,14 @@ export class Game {
                 this.pieces[i].position = -1
                 this.pieces[i].height = 0
             })
-            this.board[idx] = []        
+            this.board[idx] = []
         }
 
         //find highlights
         if (this.currentView > 0) {
             this.highlightMove(this.history[this.currentView - 1])
         } else {
-            this.highlight.length = 0   
+            this.highlight.length = 0
         }
     }
 
@@ -472,7 +473,7 @@ export class Game {
 
     canPlay(): boolean {
         //viewing last ply and controls current player
-        return this.currentView == this.history.length && ((this.data.color >> (this.currentPly() & 1)) & 1) == 1
+        return this.currentView == this.history.length && ((this.data.color >> (this.currentPly() & 1)) & 1) == 1 && this.gameState == GameState.Ongoing
     }
 
     currentPly(): number {
@@ -552,7 +553,7 @@ export class Game {
         }
         this.deselect()
 
-        let c = this.currentPly()       
+        let c = this.currentPly()
         let color = (c & 1)
 
         if (c < 2 && this.data.opening != 0) {
@@ -615,7 +616,7 @@ export class Game {
                 //move encoding gets funky with this, but we can assume if theres more theyll all be flats, which will cause correct move serialization
                 this.sendMove((this.pieces[this.selectedPile[0]].type << 6) | idx)
 
-            } else if (this.currentPly() < 2) {
+            } else if ((this.currentPly() < 2) || (pile[pile.length - 1] & 1) != (this.currentPly() & 1)) {
                 this.deselect()
             } else {
                 this.deselect()
@@ -685,10 +686,10 @@ export class Game {
             let idx = Game.idx(x, y)
             let diff = idx - this.startingTile
             let d = diff / this.delta
-            
+
             let distance = (((this.drops & 0x7F) * 0x204081 & 0x1111111) % 0xF) + (this.drops >> 7)
             let currentTile = this.startingTile + this.delta * distance
-            
+
             if (currentTile == idx) {
                 if (this.drops == 0) {
                     if (this.totals > 0) {
@@ -702,7 +703,7 @@ export class Game {
                         this.drops ^= (1 << (this.selectedPile.length - this.totals))
                         this.totals -= 1
                         this.pieces[this.selectedPile[this.totals]].selected = true
-                        
+
                         let prev = idx - this.delta
                         let l = (prev == this.startingTile) ? this.totals : this.board[prev].length
                         for (let i = this.totals; i < this.selectedPile.length; i++) {
@@ -775,14 +776,14 @@ export class Game {
 
 
         let ply = this.startPos == undefined ? this.currentView : this.currentView + this.startPos.ply
-        str += (ply & 1) == 0 ? " 1 " : " 2 " 
+        str += (ply & 1) == 0 ? " 1 " : " 2 "
         str += (2 + ply >> 1).toString()
 
         return str
     }
 
     getPTN(): string {
-        //TODO opening header, 
+        //TODO opening header,
         let opening = ["no-swap", "swap", "double black stack"][this.data.opening]
         let komi = (this.data.halfkomi & 1) == 1 ? `${this.data.halfkomi >> 1}.5` : (this.data.halfkomi >> 1).toString()
         let str = `[Player1 "${this.data.p1}"]\n[Player2 "${this.data.p2}"]\n[Size "${this.data.size}"]\n[Komi "${komi}"]
@@ -821,6 +822,108 @@ export class Game {
 
         return str
     }
+
+    hasRoad(color: number): boolean {
+        //vertical road checks
+        let queue = []
+        let visited = Array(64).fill(false)
+        for(let i = 0; i < this.data.size; i++) {
+            if (this.board[i].length > 0) {
+                let top = this.board[i][this.board[i].length-1]
+                if ((top & 1) == color && this.pieces[top].type != PieceType.Wall) {
+                    queue.push(i)
+                    visited[i] = true
+                }
+            }
+        }
+        while (queue.length > 0) {
+            let idx = queue.pop()
+            for (let dir of [1, -1, 8, -8]) {
+                let newidx: number = idx + dir
+
+                //board edge checks
+                if (newidx < 0) {continue}
+                if ((dir == 1 && (idx & 0x7) == (this.data.size - 1)) || (dir == -1 && (idx & 0x7) == 0)) {continue}
+
+
+                if (this.board[newidx].length == 0) {continue}
+                let top = this.board[newidx][this.board[newidx].length-1]
+                if ((top & 1) != color || this.pieces[top].type == PieceType.Wall) {continue}
+
+                if (newidx >= 8 * this.data.size - 8) {
+                    return true
+                }
+                if (visited[newidx]) {continue}
+
+                //revisiting check
+                queue.push(newidx)
+                visited[newidx] = true
+            }
+        }
+
+        //horizontal road checks
+        visited.fill(false)
+        for(let i = 0; i < this.data.size; i++) {
+            if (this.board[8*i].length > 0) {
+                let top = this.board[8*i][this.board[8*i].length-1]
+                if ((top & 1) == color && this.pieces[top].type != PieceType.Wall) {
+                    queue.push(8*i)
+                    visited[8*i] = true
+                }
+            }
+        }
+        while (queue.length > 0) {
+            let idx = queue.pop()
+            for (let dir of [1, -1, 8, -8]) {
+                let newidx: number = idx + dir
+
+                //board edge checks
+                if (newidx < 0 || newidx >= 8*this.data.size) {continue}
+                if (dir == -1 && (idx & 0x7) == 0) {continue}
+
+
+                if (this.board[newidx].length == 0) {continue}
+                let top = this.board[newidx][this.board[newidx].length-1]
+                if ((top & 1) != color || this.pieces[top].type == PieceType.Wall) {continue}
+
+                if ((newidx & 0x7) == this.data.size-1) {
+                    return true
+                }
+                if (visited[newidx]) {continue}
+
+                //revisiting check
+                queue.push(newidx)
+                visited[newidx] = true
+            }
+        }
+
+        return false
+    }
+
+    open_space(): number {
+        let s = 0
+        for (let x = 0; x < this.data.size; x++) {
+            for (let y = 0; y < 8*this.data.size; y+=8) {
+                s += Number(this.board[y+x].length == 0)
+            }
+        }
+        return s
+    }
+
+    flat_counts(): [number, number] {
+        let c: [number, number] = [0, 0]
+        for (let x = 0; x < this.data.size; x++) {
+            for (let y = 0; y < 8*this.data.size; y+=8) {
+                if (this.board[y+x].length > 0) {
+                    let top = this.board[y+x][this.board[y+x].length - 1]
+                    if (this.pieces[top].type == PieceType.Flat) {
+                        c[top & 1]++
+                    }
+                }
+            }
+        }
+        return c
+    }
 }
 
 export function moveString(move: number): string {
@@ -846,7 +949,7 @@ export function moveString(move: number): string {
         if (move >> 16 == 1) {
             s += "*"
         }
-        
+
     } else { //its a placement
         s = ["", "S", "C"][move >> 6] + s
     }
@@ -878,7 +981,7 @@ export function parsePtn(s: string): number {
         return sq | (PieceType.Flat << 6)
     } else {
         let dir = [">","+","<","-"].indexOf(s.charAt(2))
-        
+
         if (s.charAt(s.length - 1) == "*") {
             sq |= 1 << 16
             s = s.slice(0, -1)
@@ -900,7 +1003,7 @@ export function parsePtn(s: string): number {
             }
             drops = (drops >> (9-total)) & 0xFF
         }
-      
+
         return sq | (dir << 6) | (drops << 8)
     }
 
