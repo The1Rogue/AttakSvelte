@@ -18,7 +18,7 @@
     <!-- <PTN game={game}/> -->
 <div class="holder" style:--size={game.data.size} onfocusout={() => {if (!this.matches(":focus-within")) game.deselect()}}>
 
-    {#if showMenu}
+    {#if showMenu && !bare}
         <GameInfo game={game} hide={() => showMenu = false}/>
     {/if}
 

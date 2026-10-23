@@ -9,7 +9,7 @@ type Puzzle = {
 
 export const puzzle = {
     startpos: TPSPosition.fromTPS("2,x,1,x2/2,1,2,1,x/21,2,2,1C,x/2,x,2C,1,1/x,1,1,212S,x 2 12", 21, 1)[0],
-    moves: [0x191, 0x40, 0x683, 0x199, 0x250]
+    moves: [0x191, 0x40, 0x683, 0x199, 0x250, 0x193, 0x9]
 } 
 
 class PuzzleBackend implements GameBackend {   
@@ -19,7 +19,7 @@ class PuzzleBackend implements GameBackend {
         let l = game.history.length
         if (move == puzzle.moves[l - 1]) {
             if (l == puzzle.moves.length) {
-                game.end(game.data.color + 5)
+                game.end(game.data.color + 3)
             } else {
                 game.addMove(puzzle.moves[l])
             }

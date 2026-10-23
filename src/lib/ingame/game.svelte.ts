@@ -5,6 +5,7 @@ import moveSound from "$lib/assets/move.mp3"
 import endSound from "$lib/assets/end.mp3"
 import timeSound from "$lib/assets/time.mp3"
 import { GameStateStrings } from "$lib/backends/playtak_stable.svelte"
+import { settings } from "$lib/theme.svelte"
 
 const moveAudio = new Audio(moveSound)
 const endAudio = new Audio(endSound)
@@ -24,6 +25,13 @@ enum Color {
     Black = 2,
     Both = 3
 }
+
+enum Opening {
+    Nothing,
+    Swap,
+    Double_Black_Stack
+}
+
 
 enum GameState {
     Ongoing,
@@ -560,7 +568,7 @@ export class Game {
             color ^= 1
             if (type != PieceType.Flat) { return }
 
-            if (this.data.opening == 2 && c == 0) {
+            if (this.data.opening == Opening.Double_Black_Stack && c == 0) {
                 let id = (this.data.caps + this.reserve_flats[color]) * 2 + color - 4
                 this.selectedPile.push(id)
                 this.pieces[id].selected = true
@@ -583,8 +591,31 @@ export class Game {
 
 
         if (this.state == State.None) {
-            if (pile.length == 0 || this.currentPly() < 2) { return }
-            if ((pile[pile.length - 1] & 1) != (this.currentPly() & 1)) { return }
+            let c = this.currentPly()
+            let color = c & 1
+            if (pile.length == 0 && this.reserve_flats[color] > 0 && settings.fast_moves) {
+                if (c < 2) {
+                    if (this.data.opening != Opening.Nothing) {color = 1-color}
+                    if (this.data.opening == Opening.Double_Black_Stack && c == 0) {
+                        let id = (this.data.caps + this.reserve_flats[color]) * 2 + color - 2
+                        this.reserve_flats[color] -= 1
+                        this.board[idx].push(id)
+                        this.pieces[id].position = idx
+                        this.pieces[id].height = 0
+                    } 
+                }
+
+                let id = (this.data.caps + this.reserve_flats[color]) * 2 + color - 2
+                this.reserve_flats[color] -= 1
+                this.pieces[id].height = this.board[idx].length
+                this.pieces[id].position = idx
+                this.board[idx].push(id)
+                this.sendMove(idx)
+                return
+            }
+
+            if (pile.length == 0 || c < 2) { return }
+            if ((pile[pile.length - 1] & 1) != (c & 1)) { return }
 
             this.state = State.Pile
             this.selectedPile = pile.slice(-this.data.size)
@@ -679,8 +710,36 @@ export class Game {
         this.deselect()
     }
 
+    
     rclickPile(x: number, y: number) {
-        if (this.state == State.Reserve) {
+        if (!this.canPlay()) {
+            this.deselect()
+            return;
+        }
+
+        let c = this.currentPly()
+        if (this.state == State.None && settings.fast_moves && c >= 2) {
+            let idx = Game.idx(x, y)
+            let pile = this.board[idx]
+
+            let color = (c & 1)
+            if (pile.length == 0) {
+                let id
+                if (this.reserve_caps[color] > 0) {
+                    id = this.reserve_caps[color] * 2 + color - 2
+                    this.reserve_caps[color] -= 1
+                    this.sendMove((PieceType.Cap << 6) | idx)
+                } else {
+                    id = (this.data.caps + this.reserve_flats[color]) * 2 + color - 2
+                    this.pieces[id].type = PieceType.Wall
+                    this.reserve_flats[color] -= 1
+                    this.sendMove((PieceType.Wall << 6) | idx)
+                }
+                this.board[idx].push(id)
+                this.pieces[id].position = idx
+                this.pieces[id].height = 0
+            }
+        } else if (this.state == State.Reserve) {
             this.deselect()
         } else if (this.state == State.Pile) {
             let idx = Game.idx(x, y)
