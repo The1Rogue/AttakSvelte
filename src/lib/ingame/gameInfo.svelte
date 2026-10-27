@@ -30,7 +30,7 @@
         {#if "id" in game.data}
             <button class="rounded_button" onclick={() => {navigator.clipboard.writeText(game.data.id); addToast("Game ID copied!", false)}} title="click to copy">Game ID: {game.data.id}</button>
         {/if}
-        <button class="rounded_button" onclick={() => closeGame(game.data.id)}> Close Game </button>
+        <button class="rounded_button" onclick={() => closeGame(game)}> Close Game </button>
     </div>
 </div>
 
@@ -45,7 +45,7 @@
         width: 100%;
         height: 100%;
         background-color: var(--panel);
-        border-radius: 5px;
+        border-radius: 0 0 5px 5px;
     }
 
 

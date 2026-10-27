@@ -129,8 +129,8 @@ export function getGame(id: number): Game | undefined {
     return games.find((e) => e.data.id == id)
 }
 
-export function closeGame(id: number) {
-    let idx = games.findIndex((e) => e.data.id == id)
+export function closeGame(game: Game) {
+    let idx = games.indexOf(game)
     if (idx < 0) {return }
     games.splice(idx, 1)
     if ( games.length <= 0 ) {

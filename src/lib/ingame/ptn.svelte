@@ -60,11 +60,13 @@
         </div>
     </div>
     <div class="right">
-        <div class="metabuttons">
+        <div>
             {#if game.data.color != 0}
+            <div class="metabuttons">
                 <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.undoReq]} onclick={() => undoButton()}>undo</button>
                 <button class="material-symbols-outlined rounded_button" onclick={() => game.backend.resign(game)}>flag</button>
                 <button class="material-symbols-outlined rounded_button" style:background={["", "#5397f4", "#9F7F00", ""][game.drawReq]} onclick={() => drawButton()}>handshake</button>
+            </div>
             {/if}
         </div>
 
@@ -220,7 +222,7 @@
         margin: auto 5px;
         line-height: 1;
     }
-    
+
     .ply {
         min-width: 20%;
         text-align: center;

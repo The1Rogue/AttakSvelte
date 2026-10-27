@@ -81,7 +81,7 @@
 }
 
 .notif {
-    border: solid 5px #ff0000;
+    border: solid 5px var(--warn);
     border-radius: 50%;
     width: 0;
     height: 0;

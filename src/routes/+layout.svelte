@@ -41,6 +41,9 @@
 	style:--text_light={colorString(theme.ui.text_light)}
 	style:--text_dark={colorString(theme.ui.text_dark)}
 
+	style:--notif={"#00FF3FAF"}
+	style:--warn={"#CD5C5CAF"}
+
 	style:--board_light={colorString(theme.board.light)}
 	style:--board_dark={colorString(theme.board.dark)}
 	style:--board_reserves={colorString(theme.board.reserves)}
@@ -212,13 +215,13 @@ header > :not(div):hover {
 	margin: 5px;
 	padding: 3px 10px;
 	border-radius: 20px;
-	background: #00ff3FAF;
+	background: var(--notif);
 	z-index: 101;
 	color: var(--text_dark)
 }
 
 .error {
-	background: indianred;
+	background: var(--warn);
 }
 
 .mainbody {
