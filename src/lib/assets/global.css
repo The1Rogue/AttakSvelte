@@ -95,7 +95,7 @@ textarea {
 }
 
 .go_button {
-    transition: translate 400ms;
+    transition: translate var(--anim_speed);
     background: 0;
     border-style: none;
     border-width: 0;
@@ -124,7 +124,7 @@ textarea {
         overflow: hidden;
         height: 100%;
         width: 0;
-        transition: width 400ms;
+        transition: width var(--anim_speed);
 
         font-family: "Material Symbols Outlined";
         background: var(--primary);
