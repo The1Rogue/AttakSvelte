@@ -2,41 +2,13 @@
 
 
 <script lang="ts">
-
-    import GameInfo from "$lib/ingame/gameInfo.svelte"
     import { theme } from "$lib/theme.svelte";
     
-    let { game, bare } = $props()  
-
-    let timew = $derived((game.timew / 60000 | 0) + ":" + ("" + ((game.timew / 1000 | 0) % 60)).padStart(2, "0"))
-    let timeb = $derived((game.timeb / 60000 | 0) + ":" + ("" + ((game.timeb / 1000 | 0) % 60)).padStart(2, "0"))
-
-    let showMenu = $derived(game.gameState > 0)
+    let { game } = $props()  
 </script>
 
 
-    <!-- <PTN game={game}/> -->
 <div class="holder" style:--size={game.data.size} onfocusout={() => {if (!this.matches(":focus-within")) game.deselect()}}>
-
-    {#if showMenu && !bare}
-        <GameInfo game={game} hide={() => showMenu = false}/>
-    {/if}
-
-    {#if !bare}
-        <div class="head">
-            {#if game.timew > 0 || game.timeb > 0}
-                <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1} - {timew}</p>
-                <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{timeb} - {game.data.p2}</p>
-            {:else}
-                <p class={["pwhite", (game.currentPly() & 1) == 0 ? "active" : ""]}>{game.data.p1}</p>
-                <p class={["pblack", (game.currentPly() & 1) == 1 ? "active" : ""]}>{game.data.p2}</p>
-            {/if}
-            <i class="fill-primary material-symbols-outlined" onclick={() => showMenu = true}>menu</i>
-            <!-- <svg viewBox="0 0 448 512" class="fill-primary" onclick={() => showMenu = true}>
-                <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"></path>
-            </svg> -->
-        </div>
-    {/if}
     <div class="board" role="none">
         {#each {length: game.data.size}, c}
                 {#each {length: game.data.size}, r}
@@ -68,93 +40,34 @@
                 {/each}
         {/each}
         {#each game.pieces as piece, i (piece.id)}
-            {#if !bare || piece.position > 0}
-                <button
-                    onclick={() => game.clickReserve(piece.type)}
-                    oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
-                    class={["piece",
-                        piece.selected ? "selected" : "",
-                        (i&1) == 0 ? 'white' : 'black',
-                        ["flat", "wall", "cap"][piece.type],
-                        game.highlight.includes(i) ? "highlight" : "",
-                        piece.position >= 0 ? "" : "reserve",
-                        piece.position >= 0 && piece.height < (game.board[piece.position].length - game.data.size) ? "overflow" : ""
-                    ]}
+            <button
+                onclick={() => game.clickReserve(piece.type)}
+                oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
+                class={["piece",
+                    piece.selected ? "selected" : "",
+                    (i&1) == 0 ? 'white' : 'black',
+                    ["flat", "wall", "cap"][piece.type],
+                    game.highlight.includes(i) ? "highlight" : "",
+                    piece.position >= 0 ? "" : "reserve",
+                    piece.position >= 0 && piece.height < (game.board[piece.position].length - game.data.size) ? "overflow" : ""
+                ]}
 
-                    style:--x={piece.position & 0x7}
-                    style:--y={piece.position >> 3}
-                    style:--z={piece.position >= 0 ? piece.height : ((i>>1) - game.data.caps) / (game.data.caps + game.data.flats)}
-                    style:--h={piece.position >= 0 ? game.board[piece.position].length : 0}
-                ></button>
-            {/if}
+                style:--x={piece.position & 0x7}
+                style:--y={piece.position >> 3}
+                style:--z={piece.position >= 0 ? piece.height : ((i>>1) - game.data.caps) / (game.data.caps + game.data.flats)}
+                style:--h={piece.position >= 0 ? game.board[piece.position].length : 0}
+            ></button>
         {/each} 
     </div>
     <div class="reserveHolder"
-        style:display={bare ? "none" : "block"} tabindex="-1"
+        tabindex="-1"
         onclick={() => game.clickReserveBar()}
         oncontextmenu={(e) => {e.preventDefault(); game.rclickReserve()}}
         >
     </div>
 </div>
+
 <style>
-    .holder {
-        margin: auto;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-
-        /* this is equivalent to a max-height of 100% */
-        /* but that cant be set because the height is dynamic */
-        max-width: min(100%, calc(var(--size) * (100vh - 80px - 1.5em) / (var(--size) + .75)));
-    }
-
-    /* .holder:focus-within {
-        border: 3px solid var(--secondary);
-        border-radius: 10px;
-    }
-     */
-
-    .head {
-        display: flex;
-        justify-content: space-between;
-        align-items: stretch;
-        border-radius: 5px 5px 0 0;
-        background: var(--primary);
-    }
-    p {
-        flex-grow: 1;
-        font-size: 1.5em;
-        margin: 0;
-        padding: 1px 5px;
-        overflow: hidden;
-    }
-
-    i {
-        font-size: 2em;
-        padding: 3px;
-    }
-
-    .pwhite {
-        border: solid var(--white);
-        border-width: 1px 1px 4px 1px;
-        background-color: var(--white);
-        color: var(--black);
-        border-radius: 5px 0px 0px 0px;
-    }
-    
-    .pblack {
-        border: solid var(--black);
-        border-width: 1px 1px 4px 1px;
-        background-color: var(--black);
-        color: var(--white);
-        text-align: end;
-    }
-
-    .active {
-        border: solid var(--primary);
-        border-width: 1px 1px 4px 1px;
-    }
-
     .reserveHolder {
         background-color: var(--board_reserves);
         aspect-ratio: var(--size) / .75;
@@ -282,13 +195,14 @@
 
     .colLabel {
         padding: 1px 2px;
+        margin: 0;
         font-size: min(1.5vh, 2vw);
-
         grid-area: 3/3/3/3;
         color: var(--text_light);        
     }
     .rowLabel {
         padding: 1px 2px;
+        margin: 0;
         font-size: min(1.5vh, 2vw);
         grid-area: 1/1/1/1;
         color: var(--text_light)
@@ -327,8 +241,4 @@
         background: var(--black);
         border-color: var(--black_border);
     }
-
-
-
-
 </style>

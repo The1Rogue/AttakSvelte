@@ -44,7 +44,6 @@
         align-items: center;
         width: 100%;
         height: 100%;
-        /* background-color: #5F5F5F7F; */
         background-color: var(--panel);
         border-radius: 5px;
     }

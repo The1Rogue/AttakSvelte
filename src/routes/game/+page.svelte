@@ -1,75 +1,42 @@
 
 <script lang="ts">
-    import Board from "$lib/ingame/board.svelte"
-
     import { games } from "$lib/backends/connector.svelte";
-    import PTN from "$lib/ingame/ptn.svelte"
+    import PTN from "$lib/ingame/ptn.svelte";
     import { goto } from "$app/navigation";
 
     if (games.length == 0) {
         goto("/")
     }
 
-    function onKeyDown(e: KeyboardEvent) {
-        switch(e.keyCode) {
-            case 8:
-                games[selected].reset()
-                break;
-            case 37:
-                games[selected].undo()
-                break;
-            case 39:
-                games[selected].do()
-                break;
-        }
-    }
-
     let selected = $state(0)
+    let selected_second = $state(1)
+
+    let w = $state(1)
+    let h = $state(1)
+    let ratio = $derived(w/h)
 </script>
 
+<svelte:window bind:outerHeight={h} bind:outerWidth={w}/>
 
-<div class="holder" tabindex=0 onkeydown={onKeyDown}>
-    <PTN game={Object.values(games)[selected]}/>
-    <div 
-        class="boards"
-        style:--w={Math.ceil(Math.sqrt(Object.keys(games).length))}
-        >
+<div class="holder">
+{#if games.length <=1 }
+    <PTN game={games[0]} small={ratio <= 1}></PTN>
+{:else if ratio > 1.2} 
+<!-- perhaps we can extend this beyond 2 dynamically (.6 ratio per game or smth) though not really required-->
+    <PTN game={games[selected]} small={ratio <= 2}></PTN>
+    <PTN game={games[selected_second]} small={ratio <= 2}></PTN>
+    
+{:else}
+    <PTN game={games[selected]} small={ratio <= 1.5}></PTN>
+{/if}
 
-        {#each Object.values(games) as game}
-            <div class="board">
-                <Board game={game} bare={false}/>
-            </div>
-        {/each}
-    </div>
 </div>
-
 
 <style>
     .holder {
         display: flex;
-        height: 100%;
-    }
-
-    @media(max-aspect-ratio: 1/1) {
-        .holder {
-            flex-direction: column-reverse;
-        }
-    }
-
-    .boards {
-        margin: 10px 0px;
-        display: flex;
-
-        gap: 1vw;
-        justify-content: center;
-        align-items: center;
         height: calc(100% - 20px);
-        flex-grow: 1;
+        padding: 10px 0px;
+        gap: 1vw;
     }
-
-    .board {
-        height: 100%;
-        width: 100%;
-    }
-
 </style>
