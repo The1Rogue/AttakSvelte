@@ -68,7 +68,7 @@
                 trigger: 0,
                 color: 3,
                 halfkomi: komi * 2,
-                opening: 1,
+                opening: settings.opening,
                 flats: settings.flats,
                 caps: settings.caps,
                 rated: false,
@@ -241,7 +241,15 @@
             <label>Komi: <br/><input type=number min=0 max=4 step=.5 bind:value={komi} title="a flat score added for black when the game ends on flats"/></label>
             <label>Flats: <br/><input type=number min=10 max=80 bind:value={settings.flats}/></label>
             <label>Capstones: <br/><input type=number min=0 max=5 bind:value={settings.caps}/></label>
-
+            <label>Opening: <br/>
+            
+                <select class="rounded_button" bind:value={settings.opening}>
+                    <option value={0}>No-Swap</option>
+                    <option value={1}>Swap</option>
+                    <option value={2}>Double Black Stack</option>
+                </select>
+            </label>
+            <br/>
             <label for=ptn >PTN/TPS:</label><textarea id=ptn rows=10 bind:value={ptn}></textarea>
             <button class="rounded_button" onclick={() => createScratch()}>Create Game</button>
         </div>
