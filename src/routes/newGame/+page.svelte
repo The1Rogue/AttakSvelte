@@ -34,6 +34,7 @@
     let gametype = $state(0)
     let komi = $state(2)
     let time = $state(10)
+    let extra = $state(0)
     let ptn = $state("")
 
     const defaultflats = [10, 15, 21, 30, 40, 50]
@@ -51,6 +52,7 @@
         settings.rated = gametype != 0
         settings.tourney = gametype == 2
         settings.time = time * 60
+        settings.extra = extra * 60
         search(settings)
         goto("/")
     }
@@ -207,7 +209,7 @@
 
             <label>Time: (minutes)<br/><input type=number min=1 max=180 bind:value={time}/></label>
             <label>Increment: (seconds)<br/><input type=number min=0 max=180 bind:value={settings.inc}/></label>
-            <label>Extra Time: (minutes)<br/><input type=number min=0 max=60 bind:value={settings.extra} title="extra time added once at the trigger move"/></label>
+            <label>Extra Time: (minutes)<br/><input type=number min=0 max=60 bind:value={extra} title="extra time added once at the trigger move"/></label>
             <label>Trigger: <br/><input type=number min=0 max=60 step=5 bind:value={settings.trigger} title="when extra time is given"/></label>
             <label>Flats: <br/><input type=number min=10 max=80 bind:value={settings.flats}/></label>
             <label>Capstones: <br/><input type=number min=0 max=5 bind:value={settings.caps}/></label>
