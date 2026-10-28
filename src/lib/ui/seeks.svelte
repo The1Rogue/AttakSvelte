@@ -66,11 +66,11 @@
             <label class="radioinp"><input type="radio" name="size" value={8} bind:group={size}/>8x8</label>
             <label class="radioinp"><input type="radio" name="time" value={5} bind:group={time}/>1+5</label>
 
-            <button class="go_button" onclick={createSeek}>Search</button>
+            <button class="go_button" onclick={() => {createSeek(); document.getElementById("mainSeekTab").open = true}}>Search</button>
             <button class="go_button" onclick={() => goto("/newGame")}>Advanced</button>
         </div>
     </details>
-    <details name="seeks" open style="--n: 2">
+    <details name="seeks" id="mainSeekTab" open style="--n: 2">
         <summary class="subitem tab">Lobby ({Object.keys(player_seeks).length} | {Object.keys(bot_seeks).length})</summary>
         <div class="list ui_panel" style:--columns=3>
             <h3 class="section">Player Games</h3>
