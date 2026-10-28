@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { GameData } from "$lib/backends/connector.svelte"
-    import { search, player_seeks, bot_seeks, ongoing, spectate } from "$lib/backends/connector.svelte";
+    import { search, player_seeks, bot_seeks, ongoing, spectate, timeString } from "$lib/backends/connector.svelte";
 
     import Seek from "$lib/ui/seek.svelte"
 
@@ -96,11 +96,7 @@
                 <button class="seek go_button" style:--columns=2 onclick={() => spectate(parseInt(i))}> 
                     <p>{seek.p1} - {seek.p2}</p>
                     <p>{seek.size}s +{seek.halfkomi/2} komi</p>
-                    <p>{seek.time / 60}'+{seek.scaling_inc ? (seek.inc != 1 ? seek.inc + "n" : "n") : seek.inc}"
-                    {#if seek.extra > 0}
-                        + {seek.extra/60}'@{seek.trigger}
-                    {/if}
-                    </p>
+                    <p>{timeString(seek)}</p>
                 </button>
             {:else}
                 <p>-</p>

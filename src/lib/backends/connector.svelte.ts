@@ -50,6 +50,7 @@ export interface ChatBackend {
 export interface OnlineBackend {
     username: string,
     connected: boolean,
+    outgoingSeek : GameData | undefined,
 
     attempt_login: (username: string, password: string) => boolean,
     disconnect: () => void,
@@ -181,4 +182,23 @@ export async function get_rating(user: string) {
 
 export async function get_history(options: Object) {
     return ACTIVE_BACKEND.get_history(options)
+}
+
+export function timeString(data: GameData): String {
+    let s = `${data.time/60}'`
+    if (data.inc > 0) {
+        if (data.inc == 1 && data.scaling_inc) {
+            s += "+n\""
+        } else if (data.scaling_inc) {
+            s += `+${data.inc}n"`
+        } else {
+            s += `+${data.inc}"`
+        }
+    }
+
+    if (data.extra > 0) {
+        s += ` +${data.extra/60}'@${data.trigger}`
+    }
+
+    return s
 }

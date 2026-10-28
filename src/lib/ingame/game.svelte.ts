@@ -1,5 +1,5 @@
 
-import type { GameBackend, GameData } from "$lib/backends/connector.svelte"
+import { timeString, type GameBackend, type GameData } from "$lib/backends/connector.svelte"
 
 import moveSound from "$lib/assets/move.mp3"
 import endSound from "$lib/assets/end.mp3"
@@ -849,16 +849,11 @@ export class Game {
 [Flats "${this.data.flats}"]\n[Caps "${this.data.caps}"]\n[Opening "${opening}"]\n`
 
         if (this.data.time > 0) {
-            let clock = splitClock(this.data.time)
-            clock += this.data.scaling_inc ? this.data.inc == 1 ? " +n" : ` +${splitClock(this.data.inc)}n` : ` +${splitClock(this.data.inc)}`
-            if (this.data.extra > 0) {
-                clock += ` @${this.data.trigger} +${splitClock(this.data.extra)}`
-            }
-            str += `[Clock "${clock}"]\n`
+            str += `[Clock "${timeString(this.data)}"]\n`
         }
 
         if (this.startPos != undefined) {
-            str += `[TPS "${this.startPos.getTPS(this.data.size)}"]\n` //TODO
+            str += `[TPS "${this.startPos.getTPS(this.data.size)}"]\n`
         }
 
         if (this.gameState != GameState.Ongoing) {

@@ -1,12 +1,10 @@
 
 
 <script lang="ts">
-    import { acceptGame, get_rating } from "$lib/backends/connector.svelte"
+    import { acceptGame, get_rating, timeString } from "$lib/backends/connector.svelte"
 
     let { seek } = $props()
     let ratingPromise = $state(get_rating(seek.p1))
-
-    let increment = seek.scaling_inc ? (seek.inc != 1 ? seek.inc + "n" : "n") : seek.inc
 </script>
 
 
@@ -24,8 +22,5 @@
     {/await}
     </p>
     <p>{seek.size}s +{seek.halfkomi/2} komi</p>
-    <p>{seek.time / 60}'+{increment}"
-    {#if seek.extra > 0}
-        +{seek.extra/60}'@{seek.trigger}
-    {/if}</p>
+    <p>{timeString(seek)}</p>
 </button>

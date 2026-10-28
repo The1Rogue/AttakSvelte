@@ -29,6 +29,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
     username: string = $state("")
     password: string = ""
     messageChain = Promise.resolve()
+    outgoingSeek : GameData | undefined = $state(undefined)
 
     attempt_login(username: string, password: string): boolean {
         this.username = username
@@ -57,6 +58,12 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
 
     requestGame(game: GameData) {
         this.ws?.send(`Seek ${game.size} ${game.time} ${game.inc} ${["A", "W", "B", "A"][game.color]} ${game.halfkomi} ${game.flats} ${game.caps} ${game.rated ? 0 : 1} ${game.tourney ? 1 : 0} ${game.trigger} ${game.extra} ${game.p2}`)
+    }
+
+    removeSeek() {
+        if (this.outgoingSeek != undefined) {
+            this.ws?.send("Seek 0 0 0");
+        }
     }
 
     acceptGame(id: number) {
@@ -128,10 +135,6 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         else if (msg.startsWith("Seek new")) {
             let cmd = msg.split(" ")
 
-            if (cmd[16] != this.username && cmd[16] != "0") {
-                return
-            }
-
             let seek: GameData = {
                 id: parseInt(cmd[2]),
                 p1: cmd[3],
@@ -151,14 +154,29 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
                 tourney: cmd[13] == "1"
             }
 
+            if (seek.p1 == this.username) {
+                this.outgoingSeek = seek;
+                return 
+            }
+
+            if (seek.p2 != this.username && seek.p2 != "0") {
+                return
+            }
+
             if (cmd[17] == "1") {
                 bot_seeks[parseInt(cmd[2])] = seek
             } else {
                 player_seeks[parseInt(cmd[2])] = seek
             }
+
         } else if (msg.startsWith("Seek remove")) {
             let cmd = msg.split(" ")
             
+            if (cmd[3] == this.username) {
+                this.outgoingSeek = undefined;
+                return
+            }
+
             if (cmd[17] == "1") {
                 delete bot_seeks[parseInt(cmd[2])]
             } else {

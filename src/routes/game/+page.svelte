@@ -95,7 +95,7 @@
     }
 
     .selector {
-        position: absolute;
+        position: fixed;
         display: flex;
         flex-direction: column;
         right: 0;

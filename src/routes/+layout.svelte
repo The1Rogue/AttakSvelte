@@ -7,7 +7,7 @@
 	import Chat from '$lib/chat/chatTab.svelte';
 	import { toasts } from '$lib/ui/toast.svelte';
 	import { theme, settings, colorString } from "$lib/theme.svelte"
-	import { connect, disconnect, games, getUsername, isConnected } from "$lib/backends/connector.svelte"
+	import { ACTIVE_BACKEND, connect, disconnect, games, getUsername, isConnected, timeString } from "$lib/backends/connector.svelte"
 
 	import { fade } from "svelte/transition";
 	import { page } from '$app/state';
@@ -109,12 +109,22 @@
 	{@render children()}
 </div>
 
-{#if page.url.pathname != "/game" && Object.keys(games).length > 0}
-	<a class="boardpopup material-symbols-outlined" href="/game">
-			<!-- <svg class="navicon" viewBox="0 0 24 24"><path d="M19 17H22V19H19V22H17V19H14V17H17V14H19V17M8 16H12V12H8V16M12 12H16V8H12V12M2 2V22H13.54C13 21.42 12.63 20.74 12.36 20H8V16H4V12H8V8H4V4H8V8H12V4H16V8H20V12.36C20.74 12.63 21.42 13 22 13.54V2H2Z"></path></svg> -->
-			grid_on
-	</a>
-{/if}
+<div class="tabs">
+	{#if page.url.pathname != "/game" && Object.keys(games).length > 0}
+		<a class="boardpopup material-symbols-outlined" href="/game">
+				<!-- <svg class="navicon" viewBox="0 0 24 24"><path d="M19 17H22V19H19V22H17V19H14V17H17V14H19V17M8 16H12V12H8V16M12 12H16V8H12V12M2 2V22H13.54C13 21.42 12.63 20.74 12.36 20H8V16H4V12H8V8H4V4H8V8H12V4H16V8H20V12.36C20.74 12.63 21.42 13 22 13.54V2H2Z"></path></svg> -->
+				grid_on
+		</a>
+	{/if}
+
+	{#if ACTIVE_BACKEND.outgoingSeek != undefined}
+	<!-- {#if true} -->
+		<div class="outgoingseek" onclick={() => ACTIVE_BACKEND.removeSeek()}>
+			<p>&nbsp{ACTIVE_BACKEND.outgoingSeek.p2} {ACTIVE_BACKEND.outgoingSeek.size}s +{ACTIVE_BACKEND.outgoingSeek.halfkomi / 2} komi {timeString(ACTIVE_BACKEND.outgoingSeek)}&nbsp</p>
+			<em class="material-symbols-outlined">progress_activity</em>
+		</div>
+	{/if}
+</div>
 
 <Chat/>
 
@@ -169,12 +179,6 @@ header > * {
 	border: none;
 }
 
-/* @media(max-width: 750px) {
-	header > * + * {
-			display: none;
-	}
-} */
-
 .menu {
 	position: absolute;
 	top: 50px;
@@ -228,11 +232,18 @@ header > :not(div):hover {
 	height: calc(100vh - 50px);
 }
 
-.boardpopup {
+.tabs {
 	z-index: 2;
+	display: flex;
+	flex-direction: column;
 	position: fixed;
 	left: 0;
 	top: 15%;
+	align-items: start;
+	
+}
+
+.boardpopup {
 	height: 32px;
 	background: var(--primary);
 	margin: 10px 0;
@@ -240,7 +251,7 @@ header > :not(div):hover {
 	border-radius: 0 5px 5px 0;
 	transition: padding var(--animSpeed);
 	color: var(--text_dark);
-	font-size: 2em;
+	font-size: 2rem;
 }
 
 .boardpopup:hover {
@@ -248,5 +259,50 @@ header > :not(div):hover {
 	padding-left: 10px;
 	color: var(--text_light);
 }
+
+.outgoingseek {
+	background: var(--primary);
+	font-size: 0;
+	border-radius: 0 5px 5px 0;
+	transition: padding var(--animSpeed);
+	color: var(--text_dark);
+	overflow: hidden;
+	> p {
+		font-size: 1rem;
+		height: 1rem;
+		padding: .5rem 0;
+		transition: max-width calc(2 * var(--anim_speed));
+		overflow: hidden;
+		display: inline-block;
+		max-width: 0;
+		margin: 0;
+		color: inherit;
+	}
+	&:hover {
+		background: var(--accent);
+		padding-left: 10px;
+		color: var(--text_light);
+		> p {
+			max-width: 20rem;
+		}
+	}
+	em {
+		padding: 3px;
+		font-size: 2rem;
+		color: inherit;
+		animation: 2s ease-in-out 1s infinite normal none running rotate;
+	}
+}
+
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 
 </style>
