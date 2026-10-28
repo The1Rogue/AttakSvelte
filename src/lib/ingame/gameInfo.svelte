@@ -57,7 +57,7 @@
         color: var(--text_light);
         padding: 10px;
         border-radius: 10px;
-        width: 33%;
+        width: min(75%, 18rem);
         > * {
             /* min-width: 40%; */
             flex-grow: 1;

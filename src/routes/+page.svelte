@@ -20,9 +20,11 @@
     {/if}
     <Events/>
 
-    <div class=daily onclick={() => addGame(daily)} >
+    <div class=daily onclick={() => addGame(daily)}>
         <p>Daily Puzzle</p>
-        <Board game={daily} bare={true} />
+        <div style:pointer-events="none">
+            <Board game={daily}/>
+        </div>
     </div>
 </div>
 

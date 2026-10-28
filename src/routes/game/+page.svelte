@@ -26,7 +26,7 @@
     let ratio = $derived(w/h)
 
     function selectGame(i: number) {
-        if (selected_second != i) {
+        if (selected_second != i || ratio < 1.2) {
             selected = i;
         }
     }
@@ -69,7 +69,7 @@
         oncontextmenu={(e) => selectSecondGame(e, i)}>
             Visibility<p>&nbsp{game.data.p1} - {game.data.p2}</p>
         </div>
-        {:else if (game.data.color - 1) == (game.currentPly() & 1)}
+        {:else if (game.data.color - 1) == (game.currentPly() & 1) && game.state == 0}
         <div class="gametab activeturn material-symbols-outlined" 
         onclick={() => selectGame(i)}
         oncontextmenu={(e) => selectSecondGame(e, i)}>
