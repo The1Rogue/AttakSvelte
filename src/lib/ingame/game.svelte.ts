@@ -1,14 +1,11 @@
 
-import { timeString, type GameBackend, type GameData } from "$lib/backends/connector.svelte"
+import { type GameBackend, type GameData } from "$lib/backends/connector.svelte"
 
-import moveSound from "$lib/assets/move.mp3"
 import endSound from "$lib/assets/end.mp3"
 import timeSound from "$lib/assets/time.mp3"
 import { GameStateStrings } from "$lib/backends/playtak_stable.svelte"
 import { settings } from "$lib/theme.svelte"
 
-const moveAudio = new Audio(moveSound)
-const endAudio = new Audio(endSound)
 const timeAudio = new Audio(timeSound)
 
 //move: number
@@ -282,7 +279,6 @@ export class Game {
     }
 
     sendMove(move: number) {
-        moveAudio.play()
         this.currentView++
         this.history.push(move)
         this.backend.send_move(move, this)
@@ -354,7 +350,6 @@ export class Game {
 
     do() {
         if (this.currentView == this.history.length) {return}
-        moveAudio.play()
         let move = this.history[this.currentView++]
         let ply = this.startPos == undefined ? this.currentView : this.currentView + this.startPos.ply
         let idx = move & 0x3F
@@ -414,7 +409,6 @@ export class Game {
     undo() {
         this.deselect()
         if (this.currentView == 0) {return}
-        moveAudio.play()
         let move = this.history[--this.currentView]
         let idx = move & 0x3F
 
@@ -475,7 +469,6 @@ export class Game {
     }
 
     end(result: number) {
-        endAudio.play()
         this.gameState = result
     }
 
@@ -849,7 +842,7 @@ export class Game {
 [Flats "${this.data.flats}"]\n[Caps "${this.data.caps}"]\n[Opening "${opening}"]\n`
 
         if (this.data.time > 0) {
-            str += `[Clock "${timeString(this.data)}"]\n`
+            str += `[Clock "${ptnClock(this.data)}"]\n`
         }
 
         if (this.startPos != undefined) {
@@ -1064,9 +1057,21 @@ export function parsePtn(s: string): number {
     return 0
 }
 
-function splitClock(t: number): string {
-    if (t < 60) {
-        return t.toString()
+function ptnClock(data: GameData): String {
+    let s = `${data.time/60 | 0}:${data.time%60}`
+    if (data.inc > 0) {
+        if (data.inc == 1 && data.scaling_inc) {
+            s += " +n"
+        } else if (data.scaling_inc) {
+            s += ` +${data.inc}n`
+        } else {
+            s += ` +${data.inc}`
+        }
     }
-    return `${Math.floor(t/60)}:${t%60}`
+
+    if (data.extra > 0) {
+        s += ` @${data.trigger}+${data.extra/60 | 0}:${data.extra%60}'`
+    }
+
+    return s
 }

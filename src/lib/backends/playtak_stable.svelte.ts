@@ -36,7 +36,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         this.password = password
         if (this.ws != undefined && this.ws.readyState != WebSocket.CLOSED) { return false }
     
-        this.ws = new WebSocket("wss://playtak.com/ws", "binary");
+        this.ws = new WebSocket("wss://beta.playtak.com/ws", "binary");
 
         window.onbeforeunload = () => {console.log("closing connection"); this.ws?.close()}
     
@@ -57,7 +57,11 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
     }
 
     requestGame(game: GameData) {
-        this.ws?.send(`Seek ${game.size} ${game.time} ${game.inc} ${["A", "W", "B", "A"][game.color]} ${game.halfkomi} ${game.flats} ${game.caps} ${game.rated ? 0 : 1} ${game.tourney ? 1 : 0} ${game.trigger} ${game.extra} ${game.p2}`)
+        if (game.opening == 0) {
+            addToast("Server does not support no-swap games!", true);
+            return;
+        }
+        this.ws?.send(`Seek ${game.size} ${game.time} ${game.inc} ${game.scaling_inc ? 1 : 0} ${["A", "W", "B", "A"][game.color]} ${game.halfkomi} ${game.flats} ${game.caps} ${game.rated ? 0 : 1} ${game.tourney ? 1 : 0} ${game.trigger} ${game.extra} ${game.opening - 1} ${game.p2}`)
     }
 
     removeSeek() {
@@ -428,7 +432,6 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         this.ws?.send(`ChangePassword ${old_pass} ${new_pass}`)
     }
 }
-
 
 
 export function parseMove(move: Array<string>): number {

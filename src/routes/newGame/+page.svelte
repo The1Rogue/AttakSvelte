@@ -8,7 +8,6 @@
     import { Game, parsePtn, TPSPosition } from "$lib/ingame/game.svelte"
     import { addToast } from "$lib/ui/toast.svelte";
 
-
     const ptnRegex = /(?:[SFC]?[a-g][1-8](?![<+\->])|[1-8]?[a-g][1-8][<+\->][1-8]*\*?)/g
     const commentRegex = /{[^{]*}|[0-9]+\./g //also includes move numbering
 
@@ -49,7 +48,7 @@
 
     function createSeek() {
         settings.halfkomi = komi * 2
-        settings.rated = gametype != 0
+        settings.rated = gametype != 1
         settings.tourney = gametype == 2
         settings.time = time * 60
         settings.extra = extra * 60

@@ -3,8 +3,32 @@
 
 <script lang="ts">
     import { theme } from "$lib/theme.svelte";
+    import moveSound from "$lib/assets/move.mp3"
+    import timeSound from "$lib/assets/time.mp3"
+    import endSound from "$lib/assets/end.mp3"
+
+    const moveAudio = new Audio(moveSound)
+    const endAudio = new Audio(endSound)
+    const timeAudio = new Audio(timeSound)
     
+
     let { game } = $props()  
+
+    let c = 0;
+    $effect(() => {
+        for (let s of game.board) {//i know this is cursed as all hell, but it works
+            for (let _ of s) {}
+        } 
+        if (c < 1) {c+=1; return}
+        moveAudio.play()
+    })
+
+    $effect(() => {
+        if (game.gameState != 0) {
+            endAudio.play()
+        };
+    })
+
 </script>
 
 
