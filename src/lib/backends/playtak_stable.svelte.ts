@@ -36,7 +36,7 @@ class PlaytakStable implements ChatBackend, GameBackend, OnlineBackend {
         this.password = password
         if (this.ws != undefined && this.ws.readyState != WebSocket.CLOSED) { return false }
     
-        this.ws = new WebSocket("wss://beta.playtak.com/ws", "binary");
+        this.ws = new WebSocket("wss://playtak.com/ws", "binary");
 
         window.onbeforeunload = () => {console.log("closing connection"); this.ws?.close()}
     

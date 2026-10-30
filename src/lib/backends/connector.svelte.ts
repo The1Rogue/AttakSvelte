@@ -2,8 +2,7 @@
 import { goto } from "$app/navigation"
 import { Game } from "$lib/ingame/game.svelte"
 import { addToast } from "$lib/ui/toast.svelte"
-import { playtakStableBackend } from "./playtak_stable.svelte"
-
+import { playtakBetaBackend } from "./playtak_beta.svelte"
 
 import startSound from "$lib/assets/start.mp3"
 
@@ -74,7 +73,7 @@ export interface GameBackend {
 }
 
 
-export const ACTIVE_BACKEND = playtakStableBackend
+export const ACTIVE_BACKEND = playtakBetaBackend
 
 let rating_cache: {[key: string]: number} = {}
 export let games: Array<Game>                      = $state([])
