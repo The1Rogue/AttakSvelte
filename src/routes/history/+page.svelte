@@ -157,17 +157,16 @@
     .entries {
         gap: .1em 0;
         background: var(--ui);
-        align-self: stretch;
     }
 
     @media(max-width: 45em) {
         .holder {
             flex-direction: column;
+            align-items: stretch;
         }
 
         details {
             position: static;
-            align-self: stretch;
         }
     }
 </style>
