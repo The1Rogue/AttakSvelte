@@ -3,8 +3,6 @@
     import { get_history } from "$lib/backends/connector.svelte";
     import GameEntry from "$lib/ui/gameEntry.svelte";
 
-
-
     let options = $state({
         id: "",
         player_white: "",
@@ -14,17 +12,27 @@
         type: "",
         size: "",
         komi: "",
-        startDate: "",
-        endDate: ""
+        date: ""
     })
+
+    let startDate = $state("")
+    let endDate = $state("")
 
     let gamesPromise = $state(get_history({}))
 
-
     function applyFilters() {
+        if (startDate != "") {
+            if (endDate != "") {
+                options.date = `${Date.parse(startDate)}-${Date.parse(endDate)}`
+            } else {
+                options.date = `>${Date.parse(startDate)}`
+            }
+        } else if (endDate != "") {
+            options.date = `<${Date.parse(endDate)}`
+        }
+
         gamesPromise = get_history(options)
     }
-
 
 </script>
 
@@ -89,8 +97,8 @@
     </select></label>
 
     <br/>
-    <label class="input_label">After: <input type=date bind:value={options["startDate"]}/></label>
-    <label class="input_label">Before: <input type=date bind:value={options["endDate"]}/></label>
+    <label class="input_label">After: <input type=date bind:value={startDate}/></label>
+    <label class="input_label">Before: <input type=date bind:value={endDate}/></label>
 
     <br/>
 
