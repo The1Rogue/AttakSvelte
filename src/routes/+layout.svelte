@@ -12,6 +12,7 @@
 	import { fade } from "svelte/transition";
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+    import { addDirect } from '$lib/chat/chats.svelte';
 
 
 	let { children } = $props();
@@ -70,10 +71,23 @@
 	<a href="/"><img src={favicon} alt="logo"/><h1>Attak</h1></a>
 	<!-- <a href="/"><img src={logo} alt="logo"/></a> -->
 
-
-
 	{#if w > 500}
 		<div style="flex-grow: 1"></div>
+
+		<details>
+			<summary class=material-symbols-outlined>group</summary>
+			<div class="float online" onfocusout={() => this.open = false}>
+				{#each ACTIVE_BACKEND.online as user}
+					{#if user != ACTIVE_BACKEND.username}
+						<div>
+							<p>{user}</p>
+							<button class="material-symbols-outlined" onclick={() => addDirect(user)}>chat_add_on</button>
+							<button class="material-symbols-outlined" onclick={() => console.log(user)}>swords</button>
+						</div>
+					{/if}
+				{/each}
+			</div>
+		</details>
 
 		<a href="/history" class="headbutton material-symbols-outlined" title="settings">
 				cloud
@@ -83,13 +97,6 @@
 				settings
 		</a>
 
-		<!-- <svg style="margin-right:0" id="player-opp-img" class="playerimg iswhite" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-				<defs>
-										<path id="head" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
-										<clipPath id="insidehead"><use xlink:href="#head"></use></clipPath>
-				</defs>
-				<use xlink:href="#head" clip-path="url(#insidehead)"></use>
-		</svg> -->
 		<button onclick={disconnect}>
 				{getUsername()}
 		</button>
@@ -97,8 +104,22 @@
 		<button onclick={() => menu = !menu} class="material-symbols-outlined">menu</button>
 	{/if}
 </header>
-{#if menu}
+{#if menu && w <= 500}
 <div class=menu>
+	<details>
+		<summary><i class=material-symbols-outlined>group</i> Online Players</summary>
+		<div class="online">
+			{#each ACTIVE_BACKEND.online as user}
+				{#if user != ACTIVE_BACKEND.username}
+					<div>
+						<p>{user}</p>
+						<button class="material-symbols-outlined" onclick={() => addDirect(user)}>chat_add_on</button>
+						<button class="material-symbols-outlined" onclick={() => console.log(user)}>swords</button>
+					</div>
+				{/if}
+			{/each}
+		</div>
+	</details>
 	<button onclick={() => {goto("/history"); menu=false}}><i class="material-symbols-outlined">cloud</i> games database</button>
 	<button onclick={() => {goto("/settings"); menu=false}}><i class="material-symbols-outlined">settings</i> settings</button>
 	<button onclick={() => {disconnect(); menu=false}}><i class="material-symbols-outlined">logout</i> log out</button>
@@ -166,17 +187,52 @@ header {
 
 	height: 50px;
 	width: 100%;
+	padding: 0 1vw;
+	box-sizing: border-box;
+	gap: 1vw;
 }
 
 header > * {
 	display: flex;
-	margin: 0 1vw;
 	padding: 0 1vw;
 	height: 100%;
 	align-items: center;
 	color: var(--text_light);
 	background: 0;
 	border: none;
+}
+
+.float {
+	position: fixed;
+	top: 50px;
+	right: 0;
+	width: 20em;
+}
+
+.online {
+	background: var(--accent);
+	padding: .5rem;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	div {
+		display: flex;
+		background: var(--panel);
+		padding: .1rem .5rem;
+	}
+	p {
+		flex-grow: 1;
+		margin: auto;
+	}
+	button {
+		border: none;
+		padding: 5px 10px;
+		background: none;
+		&:hover {
+			background: var(--accent);
+		}
+	}
 }
 
 .menu {
@@ -187,17 +243,22 @@ header > * {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	button {
-			background: var(--accent);
-			color: var(--text_light);
-			border: none;
-			padding: .75em;
-			font-size: 1.2em;
-			i {
-					vertical-align: middle;
-			}
+	> * {
+		background: var(--accent);
+		color: var(--text_light);
+		border: none;
+		padding: .75em;
+		font-size: 1.2em;
+		summary {
+			list-style: none;
+			text-align: center;
+		}
+
+		i {
+			vertical-align: middle;
+		}
 	}
-	button:hover {
+	> *:hover {
 			background: var(--ui);
 	}
 }
