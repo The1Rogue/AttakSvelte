@@ -24,6 +24,20 @@
 	let w = $state(1)
 	let menu = $state(false)
 
+
+	function challenge(user: String) {
+		let t = localStorage.getItem("seekSettings")
+		
+		if (t != null) {
+			let t2 = JSON.parse(t)
+			t2.p2 = user
+			localStorage.setItem("seekSettings", JSON.stringify(t2))
+		} else {
+			localStorage.setItem("seekSettings", `{"p2": "${user}"}`)
+		}
+		goto("/newGame")
+	}
+
 </script>
 
 <svelte:window bind:outerWidth={w}/>
@@ -74,15 +88,15 @@
 	{#if w > 500}
 		<div style="flex-grow: 1"></div>
 
-		<details>
+		<details onfocusout={() => {if (!this.matches(":focus-within")) this.open = false}}>
 			<summary class=material-symbols-outlined>group</summary>
-			<div class="float online" onfocusout={() => this.open = false}>
+			<div class="float online">
 				{#each ACTIVE_BACKEND.online as user}
 					{#if user != ACTIVE_BACKEND.username}
 						<div>
 							<p>{user}</p>
 							<button class="material-symbols-outlined" onclick={() => addDirect(user)}>chat_add_on</button>
-							<button class="material-symbols-outlined" onclick={() => console.log(user)}>swords</button>
+							<button class="material-symbols-outlined" onclick={() => challenge(user)}>swords</button>
 						</div>
 					{/if}
 				{/each}
@@ -114,7 +128,7 @@
 					<div>
 						<p>{user}</p>
 						<button class="material-symbols-outlined" onclick={() => addDirect(user)}>chat_add_on</button>
-						<button class="material-symbols-outlined" onclick={() => console.log(user)}>swords</button>
+						<button class="material-symbols-outlined" onclick={() => challenge(user)}>swords</button>
 					</div>
 				{/if}
 			{/each}

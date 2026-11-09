@@ -7,6 +7,7 @@
 
     import { Game, parsePtn, TPSPosition } from "$lib/ingame/game.svelte"
     import { addToast } from "$lib/ui/toast.svelte";
+    import { onDestroy } from "svelte";
 
     const ptnRegex = /(?:[SFC]?[a-g][1-8](?![<+\->])|[1-8]?[a-g][1-8][<+\->][1-8]*\*?)/g
     const commentRegex = /{[^{]*}|[0-9]+\./g //also includes move numbering
@@ -29,11 +30,24 @@
         extra: 0,
     })
 
+    let t = localStorage.getItem("seekSettings")
+    if (t != null) {
+        Object.assign(settings, JSON.parse(t))
+    }
 
-    let gametype = $state(0)
-    let komi = $state(2)
-    let time = $state(10)
-    let extra = $state(0)
+    onDestroy(() => {
+        settings.halfkomi = komi * 2
+        settings.rated = gametype != 1
+        settings.tourney = gametype == 2
+        settings.time = time * 60
+        settings.extra = extra * 60
+        localStorage.setItem("seekSettings", JSON.stringify(settings))
+    })
+
+    let gametype = $state(settings.tourney ? 2 : settings.rated ? 0 : 1)
+    let komi = $state(settings.halfkomi / 2)
+    let time = $state(settings.time / 60)
+    let extra = $state(settings.extra / 60)
     let ptn = $state("")
 
     const defaultflats = [10, 15, 21, 30, 40, 50]
@@ -44,7 +58,6 @@
             settings.caps = (settings.size - 3) >> 1
         }
     )
-
 
     function createSeek() {
         settings.halfkomi = komi * 2
@@ -215,8 +228,8 @@
           
             <label>Opening: <br/><select class="rounded_button" bind:value={settings.opening}>
                 <!-- <option value={0}>no-swap</option> -->
-                 <option value={1}>swap</option>
-                 <option value={2}>double black stack</option>
+                 <option value={1}>Swap</option>
+                 <option value={2}>Double Black Stack</option>
             </select></label>
             
             <label>Scaling Increment: <br/><input type=checkbox bind:checked={settings.scaling_inc} title="scale the increment by the current move"/></label>
