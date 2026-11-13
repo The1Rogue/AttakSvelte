@@ -30,6 +30,7 @@ class PlaytakBeta implements ChatBackend, GameBackend, OnlineBackend {
     password: string = ""
     messageChain = Promise.resolve()
     outgoingSeek : GameData | undefined = $state(undefined)
+    online: Array<string> = $state([])
 
     attempt_login(username: string, password: string): boolean {
         this.username = username
@@ -347,6 +348,10 @@ class PlaytakBeta implements ChatBackend, GameBackend, OnlineBackend {
             this.disconnect()
         }
 
+
+        else if (msg.startsWith("OnlinePlayers ")) {
+            this.online = msg.slice(msg.indexOf("[") + 1, -1).split(", ").map((x) => x.slice(1,-1));
+        }
         //Online
         //OnlinePlayers
 

@@ -5,6 +5,8 @@ import { addToast } from "$lib/ui/toast.svelte"
 import { playtakBetaBackend } from "./playtak_beta.svelte"
 
 import startSound from "$lib/assets/start.mp3"
+import { playtakStableBackend } from "./playtak_stable.svelte"
+// import { TEI_Backend } from "./TEI.svelte"
 
 const startAudio = new Audio(startSound)
 
@@ -51,6 +53,8 @@ export interface OnlineBackend {
     connected: boolean,
     outgoingSeek : GameData | undefined,
 
+    online: Array<string>,
+
     attempt_login: (username: string, password: string) => boolean,
     disconnect: () => void,
 
@@ -73,7 +77,7 @@ export interface GameBackend {
 }
 
 
-export const ACTIVE_BACKEND = playtakBetaBackend
+export const ACTIVE_BACKEND = playtakStableBackend
 
 let rating_cache: {[key: string]: number} = {}
 export let games: Array<Game>                      = $state([])
@@ -201,3 +205,22 @@ export function timeString(data: GameData): String {
 
     return s
 }
+
+
+// TEI_Backend.requestGame({
+//     p1: "ME",
+//     p2: "ENGINE",
+//     size: 6,
+//     time: 0,
+//     inc: 0,
+//     scaling_inc: false,
+//     extra: 0,
+//     trigger: 0,
+//     color: Color.Black,
+//     halfkomi: 4,
+//     opening: Opening.Swap,
+//     flats: 30,
+//     caps: 1,
+//     rated: false,
+//     tourney: false
+// })
